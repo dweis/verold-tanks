@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verold Tanks</title>
+  <link rel="stylesheet" href="stylesheets/reset.css">
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
+  <script type="text/javascript" src="javascripts/underscore.js"></script>
+  <script type="text/javascript" src="javascripts/VeroldApp.js"></script>
+  <script type="text/javascript" src="javascripts/Tank.js"></script>
+  <script type="text/javascript" src="javascripts/Tanks.js"></script>
+</head>
+<body>
+
+  <div id="loading-progress-container">
+    <p>Loading...</p>
+    <div class="loading-progress">
+      <div>&nbsp;</div>
+    </div>
+  </div>
+
+  <div style="display:none;" id="webGLunsupported">
+    <p>This demo requires support for webGL.<br />
+    Click <a href="http://verold.com/blog/2013/1/2/enabling-webgl-in-your-browser" target="_blank">here</a> to learn more.</p>
+  </div>
+  <div style="position: absolute; top: 0px; left: 0px; color: white; background-color: rgba(0,0,0,0.5); padding: 10px;">
+    <ul>
+      <li>W, A, S, D - move tank</li>
+      <li>Arrow Keys - adjust turret / cannon</li>
+      <li>Space - toggle active / destroyed state</li>
+    </ul>
+  </div>
+
+  <script>
+
+    var veroldApp = new VeroldApp();
+    console.info(veroldApp);
+    var tanks = new Tanks( veroldApp );
+
+    VAPI.onReady( function() {
+      
+      veroldApp.initialize( {
+        container : null,
+        projectId : "51446324ca7df102000009b4",
+        enablePostProcess: false,
+        enablePicking: true,
+        handleInput: true,
+        clearColor: 0xff0000,
+        success: function() {
+          tanks.startup();
+        }
+      });
+    });
+
+  </script>
+</body>
+</html>

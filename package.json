@@ -1,0 +1,28 @@
+{
+  "name": "verold-tanks",
+  "version": "0.0.1",
+  "private": true,
+  "subdomain": "tanks",
+  "author": {
+    "name": "Derrick Weis",
+    "email": "derrick@derrickweis.com",
+    "url": "http://derrickweis.com"
+  },
+  "engines": {
+    "node": ">=0.6"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "dependencies": {
+    "express": "3.0.0rc4",
+    "cannon": "0.5.0",
+    "socket.io": "0.9.13",
+    "node-uuid": "1.4.0",
+    "backbone": "0.9.10",
+    "browserify": "2.4.1",
+    "underscore": "1.4.4",
+    "handleify": "0.1.1",
+    "tween": "0.8.0"
+  }
+}

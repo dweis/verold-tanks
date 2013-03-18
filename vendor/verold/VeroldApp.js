@@ -290,3 +290,5 @@ VeroldApp.prototype = {
     }
   }
 }
+
+module.exports = VeroldApp;

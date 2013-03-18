@@ -137,3 +137,5 @@ Tank.prototype._initializeWithInstance = function(instance) {
 
   this.ready = true;
 }
+
+module.exports = Tank;

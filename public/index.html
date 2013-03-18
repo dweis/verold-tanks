@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <title>Verold Tanks</title>
   <link rel="stylesheet" href="stylesheets/reset.css">
   <link rel="stylesheet" href="stylesheets/style.css">
-  <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
-  <script type="text/javascript" src="javascripts/underscore.js"></script>
-  <script type="text/javascript" src="javascripts/VeroldApp.js"></script>
-  <script type="text/javascript" src="javascripts/Tank.js"></script>
-  <script type="text/javascript" src="javascripts/Tanks.js"></script>
 </head>
 <body>
 
@@ -30,28 +26,8 @@
       <li>Space - toggle active / destroyed state</li>
     </ul>
   </div>
-
-  <script>
-
-    var veroldApp = new VeroldApp();
-    console.info(veroldApp);
-    var tanks = new Tanks( veroldApp );
-
-    VAPI.onReady( function() {
-      
-      veroldApp.initialize( {
-        container : null,
-        projectId : "51446324ca7df102000009b4",
-        enablePostProcess: false,
-        enablePicking: true,
-        handleInput: true,
-        clearColor: 0xff0000,
-        success: function() {
-          tanks.startup();
-        }
-      });
-    });
-
-  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
+  <script type="text/javascript" src="javascripts/tanks.js"></script>
 </body>
 </html>

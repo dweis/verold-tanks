@@ -8,10 +8,8 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , GameServer = require('./server/game_server')
-  /*
   , browserify = require('browserify')
   , browserify_middleware = require('./server/middleware/browserify')
- */
   , httpServer, app, io;
 
 app = express();
@@ -28,17 +26,15 @@ app.configure(function(){
   app.use(express.static(path.join(__dirname, 'public')));
 });
 
-/*
 var browserifyMiddleware = browserify_middleware({
   entry: __dirname + '/client/index.js',
   watch: __dirname + '/',
-  mount: '/javascripts/airhockey.js',
+  mount: '/javascripts/tanks.js',
   verbose: true,
   minify: false
 });
 
 app.use(browserifyMiddleware);
-*/
 
 app.configure('development', function(){
   app.use(express.errorHandler());

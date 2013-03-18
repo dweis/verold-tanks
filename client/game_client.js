@@ -1,4 +1,6 @@
-Tanks = function( veroldApp ) {
+var Tank = require('./actors/tank');
+
+GameClient = function( veroldApp ) {
 
   this.veroldApp = veroldApp;  
   this.mainScene;
@@ -6,7 +8,7 @@ Tanks = function( veroldApp ) {
   this.tank;
 }
 
-Tanks.prototype.startup = function( ) {
+GameClient.prototype.startup = function( ) {
 
   var that = this;
 
@@ -62,7 +64,7 @@ Tanks.prototype.startup = function( ) {
 	
 }
 
-Tanks.prototype.shutdown = function() {
+GameClient.prototype.shutdown = function() {
 	
   this.veroldApp.off("keyDown", this.onKeyPress, this);
   this.veroldApp.off("mouseUp", this.onMouseUp, this);
@@ -70,52 +72,21 @@ Tanks.prototype.shutdown = function() {
   this.veroldApp.off("update", this.update, this );
 }
 
-  
-
-Tanks.prototype.update = function( delta ) {
+GameClient.prototype.update = function( delta ) {
   if (this.tank) {
     this.tank.update();
   }
 }
 
-Tanks.prototype.fixedUpdate = function( delta ) {
+GameClient.prototype.fixedUpdate = function( delta ) {
   if (this.tank) {
     this.tank.fixedUpdate();
   }
 }
 
-Tanks.prototype.onMouseUp = function( event ) {
-  
-  if ( event.button == this.inputHandler.mouseButtons[ "left" ] && 
-    !this.inputHandler.mouseDragStatePrevious[ event.button ] ) {
-    
-    var mouseX = event.sceneX / this.veroldApp.getRenderWidth();
-    var mouseY = event.sceneY / this.veroldApp.getRenderHeight();
-    var pickData = this.picker.pick( this.mainScene.threeData, this.camera, mouseX, mouseY );
-    if ( pickData ) {
-      //Bind 'pick' event to an asset or just let user do this how they want?
-      if ( pickData.meshID == "51125eb50a4925020000000f") {
-        //Do stuff
-      }
-    }
-  }
-}
-
-Tanks.prototype.onKeyPress = function( event ) {
+GameClient.prototype.onKeyPress = function( event ) {
 	
 	var keyCodes = this.inputHandler.keyCodes;
-  if ( event.keyCode === keyCodes['B'] ) {
-    var that = this;
-    this.boundingBoxesOn = !this.boundingBoxesOn;
-    var scene = veroldApp.getActiveScene();
-    
-    scene.traverse( function( obj ) {
-      if ( obj.isBB ) {
-        obj.visible = that.boundingBoxesOn;
-      }
-    });
-  
-  }
   if (event.keyCode === keyCodes['space'] ) {
     if (!this.tank.isActive()) {
       this.tank.setAsActive();
@@ -123,5 +94,6 @@ Tanks.prototype.onKeyPress = function( event ) {
       this.tank.setAsDestroyed();
     }
   }
-    
 }
+
+module.exports = GameClient;

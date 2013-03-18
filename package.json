@@ -2,7 +2,7 @@
   "name": "verold-tanks",
   "version": "0.0.1",
   "private": true,
-  "subdomain": "tanks",
+  "subdomain": "verold-tanks",
   "author": {
     "name": "Derrick Weis",
     "email": "derrick@derrickweis.com",

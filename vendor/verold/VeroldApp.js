@@ -3,6 +3,7 @@ function VeroldApp( properties ) {
 
   this.veroldEngine = undefined;
 
+  this.isMobileDevice = (/iphone|ipad|ipod|android|blackberry|bb10|mini|windows\sce|palm/i.test(navigator.userAgent.toLowerCase()));
 }
 
 VeroldApp.prototype = {
@@ -60,6 +61,7 @@ VeroldApp.prototype = {
         "enablePostProcess" : options.enablePostProcess,
         "enablePicking" : options.enablePicking,
         "clearColor" : options.clearColor ? options.clearColor : 0x000000,
+        "forceLowEndRendering": that.isMobile(),
         // "isWritable" : this.isWritable,
         // "isEmbedded" : this.isEmbedded,
       });
@@ -288,6 +290,10 @@ VeroldApp.prototype = {
     } else {
       return true;
     }
+  },
+
+  isMobile: function() {
+    return this.isMobileDevice;
   }
 }
 

@@ -1,4 +1,5 @@
-var Tank = require('./actors/tank');
+var Tank = require('./actors/tank')
+  , TouchControls = require('./controls/touch_controls');
 
 GameClient = function( veroldApp ) {
 
@@ -28,6 +29,12 @@ GameClient.prototype.startup = function( ) {
       that.veroldApp.on("mouseUp", that.onMouseUp, that);
       that.veroldApp.on("fixedUpdate", that.fixedUpdate, that );
       that.veroldApp.on("update", that.update, that );
+
+      if (that.veroldApp.isMobile()) {
+        that.touchControls = new TouchControls(that.inputHandler.keyCodes);
+        console.log(that.touchControls);
+        that.touchControls.init();
+      }
 
       //Store a pointer to the scene
       that.mainScene = scene;

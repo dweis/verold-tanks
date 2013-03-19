@@ -1,4 +1,5 @@
-function Tank(template, scene, socket, inputHandler, camera) {
+function Tank(uuid, template, scene, socket, inputHandler, camera) {
+  this.uuid = uuid;
   this.template = template;
   this.socket = socket;
   this.scene = scene;
@@ -36,8 +37,10 @@ Tank.prototype.setAsActive = function() {
   this.tankDestroyed.visible = false;
   this.active = true;
 
-  this.camera.position.set( 0, 0.5, -1.5 );
-  this.camera.lookAt(new THREE.Vector3(0,0.5,0));
+  if (this.camera) {
+    this.camera.position.set( 0, 0.5, -1.5 );
+    this.camera.lookAt(new THREE.Vector3(0,0.5,0));
+  }
 }
 
 Tank.prototype.setAsDestroyed = function() {
@@ -85,29 +88,15 @@ Tank.prototype.fixedUpdate = function() {
       }
       if (this.inputHandler.keyDown('A')) {
         this.socket.emit('left');
-        /*
-        this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), 0.05);
-        this.object.quaternion.multiply(this.tmpQuaternion);
-        */
       }
       if (this.inputHandler.keyDown('D')) {
         this.socket.emit('right');
-        /*
-        this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), -0.05);
-        this.object.quaternion.multiply(this.tmpQuaternion);
-        */
       }
       if (this.inputHandler.keyDown('W')) {
         this.socket.emit('forward');
-        /*
-        this.object.translateZ(0.010);
-        */
       }
       if (this.inputHandler.keyDown('S')) {
         this.socket.emit('reverse');
-        /*
-        this.object.translateZ(-0.010);
-        */
       }
     }
   }
@@ -162,7 +151,6 @@ Tank.prototype._initializeWithInstance = function(instance) {
 }
 
 Tank.prototype.applyUpdate = function(update) {
-  //console.log(update);
   this.object.position.set(update[1], update[2], update[3]);
   this.object.quaternion.set(update[4], update[5], update[6], update[7]);
 }

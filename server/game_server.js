@@ -14,12 +14,20 @@ GameServer.prototype.initSockets = function() {
   var that = this;
 
   this.io.sockets.on('connection', function(socket)  {
-    that.createTank(socket);
+    var tank = that.createTank(socket);
+
+    socket.on('disconnect', function() {
+      that.removeTank(tank);
+    });
   });
 
   setInterval(function() {
     that.update();
   }, 1000/60);
+
+  setInterval(function() {
+    that.updateActiveTanks();
+  }, 1000);
 }
 
 GameServer.prototype.init = function() {
@@ -49,6 +57,18 @@ GameServer.prototype.createTank = function(socket) {
   socket.on('reverse', function() {
     that.physics.reverse(tank.body);
   });
+
+  return tank;
+}
+
+GameServer.prototype.removeTank = function(tankToRemove) {
+  var that = this;
+
+  _.each(this.tanks, function(tank, idx) {
+    if (tank.uuid == tankToRemove.uuid) {
+      that.tanks.splice(idx, 1);
+    }
+  });
 }
 
 GameServer.prototype.getUpdateObject = function() {
@@ -72,6 +92,10 @@ GameServer.prototype.update = function() {
   if (this.tanks.length) {
     this.io.sockets.emit('update', this.getUpdateObject());
   }
+}
+
+GameServer.prototype.updateActiveTanks = function() {
+  this.io.sockets.emit('activeTanks', _.pluck(this.tanks, 'uuid'));
 }
 
 module.exports = GameServer;

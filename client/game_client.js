@@ -8,6 +8,7 @@ GameClient = function( veroldApp ) {
   this.camera;
   this.tank;
   this.socket;
+  this.tanks = [];
 }
 
 GameClient.prototype.startup = function( ) {
@@ -70,13 +71,48 @@ GameClient.prototype.initSockets = function() {
   this.socket = io.connect();
 
   this.socket.on('update', function(updateObject) {
-    if (that.tank) {
-      that.tank.applyUpdate(updateObject.tanks.splice(0,8));
+    var c = 0;
+
+    while (updateObject.tanks.length >= 7) {
+      var update = updateObject.tanks.splice(0,8)
+        , found = false;
+
+      _.each(that.tanks, function(tank) {
+        if (tank.uuid == update[0]) {
+          found = true;
+          tank.applyUpdate(update);
+        }
+      });
+
+      if (!found) {
+        var tank = new Tank(update[0], that.model, that.mainScene);
+
+        tank.init(function() {
+          tank.applyUpdate(update);
+          that.tanks.push(tank);
+        });
+      }
     }
   });
 
   this.socket.on('connect', function() {
-    var tank = new Tank(that.model, that.mainScene, that.socket, that.inputHandler, that.camera);
+  });
+
+  this.socket.on('activeTanks', function(activeTanks) {
+      console.log('ACTIVE TANKs', activeTanks, _.pluck(that.tanks, 'uuid'));
+
+    _.each(that.tanks, function(tank, idx) {
+      if (!_.contains(activeTanks, tank.uuid)) {
+        console.log('removing', tank.uuid);
+        //tank.object.visible = false;
+        //that.tanks.splice(idx, 1);
+        that.tank.setDisabled();
+      }
+    });
+  });
+
+  this.socket.on('init', function(info) {
+    var tank = new Tank(info.uuid, that.model, that.mainScene, that.socket, that.inputHandler, that.camera);
 
     tank.init(function() {
       console.log('DONE!');
@@ -84,7 +120,9 @@ GameClient.prototype.initSockets = function() {
       tank.setAsActive();
 
       that.tank = tank;
+      that.tanks.push(tank);
     });
+
   });
 }
 

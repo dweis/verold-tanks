@@ -138,4 +138,9 @@ Tank.prototype._initializeWithInstance = function(instance) {
   this.ready = true;
 }
 
+Tank.prototype.applyUpdate = function(update) {
+  this.object.position.set(update[1], update[2], update[3]);
+  this.object.quaternion.set(update[4], update[5], update[6], update[7]);
+}
+
 module.exports = Tank;

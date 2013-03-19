@@ -17,6 +17,8 @@ GameClient.prototype.startup = function( ) {
     
     success_hierarchy: function( scene ) {
 
+      that.initSockets();
+
       // hide progress indicator
       that.veroldApp.hideLoadingProgress();
 
@@ -71,8 +73,17 @@ GameClient.prototype.startup = function( ) {
 	
 }
 
+GameClient.prototype.initSockets = function() {
+  var that = this;
+
+  this.socket = io.connect();
+
+  this.socket.on('update', function(updateObject) {
+    that.tank.applyUpdate(updateObject.tanks.splice(0,8));
+  });
+}
+
 GameClient.prototype.shutdown = function() {
-	
   this.veroldApp.off("keyDown", this.onKeyPress, this);
   this.veroldApp.off("mouseUp", this.onMouseUp, this);
 

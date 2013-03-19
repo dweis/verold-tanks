@@ -1,6 +1,7 @@
 var _ = require('underscore')
   , uuid = require('node-uuid')
-  , Physics = require('./physics');
+  , Physics = require('./physics')
+  , CANNON = require('cannon');
 
 function GameServer(io) {
   this.io = io;
@@ -31,6 +32,23 @@ GameServer.prototype.createTank = function(socket) {
   this.tanks.push(tank);
 
   socket.emit('init', { uuid: tank.uuid });
+
+  socket.on('left', function() {
+    tank.body.angularVelocity.set(0,5,0);
+  });
+
+  socket.on('right', function() {
+    tank.body.angularVelocity.set(0,-5,0);
+  });
+
+  socket.on('forward', function() {
+    //var radius=1, mass=1, f=100;
+    //    var dt=1/60, damping=0.5;
+    // Add an impulse to the center
+    var worldPoint = new CANNON.Vec3(0,0,0);
+    var force = new CANNON.Vec3(0,0,10);
+    tank.body.applyImpulse(worldPoint,force,1/60);
+  });
 }
 
 GameServer.prototype.getUpdateObject = function() {

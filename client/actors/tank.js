@@ -1,5 +1,6 @@
-function Tank(template, scene, inputHandler, camera) {
+function Tank(template, scene, socket, inputHandler, camera) {
   this.template = template;
+  this.socket = socket;
   this.scene = scene;
   this.inputHandler = inputHandler;
   this.camera = camera;
@@ -83,18 +84,30 @@ Tank.prototype.fixedUpdate = function() {
         }
       }
       if (this.inputHandler.keyDown('A')) {
+        this.socket.emit('left');
+        /*
         this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), 0.05);
         this.object.quaternion.multiply(this.tmpQuaternion);
+        */
       }
       if (this.inputHandler.keyDown('D')) {
+        this.socket.emit('right');
+        /*
         this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), -0.05);
         this.object.quaternion.multiply(this.tmpQuaternion);
+        */
       }
       if (this.inputHandler.keyDown('W')) {
+        this.socket.emit('forward');
+        /*
         this.object.translateZ(0.010);
+        */
       }
       if (this.inputHandler.keyDown('S')) {
+        this.socket.emit('reverse');
+        /*
         this.object.translateZ(-0.010);
+        */
       }
     }
   }
@@ -139,6 +152,7 @@ Tank.prototype._initializeWithInstance = function(instance) {
 }
 
 Tank.prototype.applyUpdate = function(update) {
+  console.log(update);
   this.object.position.set(update[1], update[2], update[3]);
   this.object.quaternion.set(update[4], update[5], update[6], update[7]);
 }

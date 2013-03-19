@@ -7,6 +7,7 @@ GameClient = function( veroldApp ) {
   this.mainScene;
   this.camera;
   this.tank;
+  this.socket;
 }
 
 GameClient.prototype.startup = function( ) {
@@ -50,7 +51,7 @@ GameClient.prototype.startup = function( ) {
       that.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
       that.camera.up.set( 0, 1, 0 );
       
-      var tank = new Tank(model, that.mainScene, that.inputHandler, that.camera);
+      var tank = new Tank(model, that.mainScene, that.socket, that.inputHandler, that.camera);
 
       tank.init(function() {
         console.log('DONE!');

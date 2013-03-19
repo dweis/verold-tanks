@@ -11,7 +11,7 @@ function Physics() {
   this.world.defaultContactMaterial.contactEquationRegularizationTime = 4;
 
   this.defaultMaterial = new CANNON.Material('default');
-  this.defaultContactMaterial = new CANNON.ContactMaterial(this.defaultMaterial, this.defaultMaterial, 0.5, 0.7);
+  this.defaultContactMaterial = new CANNON.ContactMaterial(this.defaultMaterial, this.defaultMaterial, 0.5, 0.0);
   this.world.addContactMaterial(this.defaultContactMaterial);
 
   var groundShape = new CANNON.Plane();
@@ -34,10 +34,12 @@ Physics.prototype.update = function(delta) {
 }
 
 Physics.prototype.addTank = function() {
-  var boxShape = new CANNON.Box(new CANNON.Vec3(1,1,2))
-    , boxBody = new CANNON.RigidBody(100,boxShape);
+  var boxShape = new CANNON.Sphere(0.1)//new CANNON.Box(new CANNON.Vec3(0.05,0.05,0.1))
+    , boxBody = new CANNON.RigidBody(1000,boxShape);
 
   boxBody.position.set(0,5,0);
+  boxBody.linearDamping = boxBody.angularDamping = 0.5;
+
   this.world.add(boxBody);
 
   return boxBody;

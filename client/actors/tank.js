@@ -126,6 +126,16 @@ Tank.prototype._initializeWithInstance = function(instance) {
   this.object.position = new THREE.Vector3(0,0,0);
   this.object.add(this.instance.threeData);
 
+  this.instance.threeData.position.y -= 0.1;
+
+  //0.4,0.1,0.4
+  var geometry = new THREE.CubeGeometry( 0.6, 0.2, 0.7 );
+  var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+  var mesh = new THREE.Mesh( geometry, material );
+
+  this.object.add(mesh);
+
+
   if (this.camera) {
     this.object.add(this.camera);
   }
@@ -152,7 +162,7 @@ Tank.prototype._initializeWithInstance = function(instance) {
 }
 
 Tank.prototype.applyUpdate = function(update) {
-  console.log(update);
+  //console.log(update);
   this.object.position.set(update[1], update[2], update[3]);
   this.object.quaternion.set(update[4], update[5], update[6], update[7]);
 }

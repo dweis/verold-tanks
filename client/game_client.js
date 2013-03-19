@@ -43,7 +43,7 @@ GameClient.prototype.startup = function( ) {
       that.mainScene = scene;
       
       var models = that.mainScene.getAllObjects( { "filter" :{ "model" : true }});
-      var model = models[ _.keys( models )[0] ];
+      var model = that.model = models[ _.keys( models )[0] ];
 
       that.mainScene.removeChildObject(model);
 
@@ -51,16 +51,6 @@ GameClient.prototype.startup = function( ) {
       that.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
       that.camera.up.set( 0, 1, 0 );
       
-      var tank = new Tank(model, that.mainScene, that.socket, that.inputHandler, that.camera);
-
-      tank.init(function() {
-        console.log('DONE!');
-        //tank.setAsDestroyed();
-        tank.setAsActive();
-
-        that.tank = tank;
-      });
-
       //Tell the engine to use this camera when rendering the scene.
       that.veroldApp.setActiveCamera( that.camera );
 
@@ -80,7 +70,21 @@ GameClient.prototype.initSockets = function() {
   this.socket = io.connect();
 
   this.socket.on('update', function(updateObject) {
-    that.tank.applyUpdate(updateObject.tanks.splice(0,8));
+    if (that.tank) {
+      that.tank.applyUpdate(updateObject.tanks.splice(0,8));
+    }
+  });
+
+  this.socket.on('connect', function() {
+    var tank = new Tank(that.model, that.mainScene, that.socket, that.inputHandler, that.camera);
+
+    tank.init(function() {
+      console.log('DONE!');
+      //tank.setAsDestroyed();
+      tank.setAsActive();
+
+      that.tank = tank;
+    });
   });
 }
 

@@ -99,14 +99,10 @@ GameClient.prototype.initSockets = function() {
   });
 
   this.socket.on('activeTanks', function(activeTanks) {
-      console.log('ACTIVE TANKs', activeTanks, _.pluck(that.tanks, 'uuid'));
-
     _.each(that.tanks, function(tank, idx) {
       if (!_.contains(activeTanks, tank.uuid)) {
-        console.log('removing', tank.uuid);
-        //tank.object.visible = false;
-        //that.tanks.splice(idx, 1);
-        that.tank.setDisabled();
+        that.mainScene.threeData.remove(tank.object);
+        that.tanks.splice(idx, 1);
       }
     });
   });
@@ -115,8 +111,6 @@ GameClient.prototype.initSockets = function() {
     var tank = new Tank(info.uuid, that.model, that.mainScene, that.socket, that.inputHandler, that.camera);
 
     tank.init(function() {
-      console.log('DONE!');
-      //tank.setAsDestroyed();
       tank.setAsActive();
 
       that.tank = tank;

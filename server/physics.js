@@ -41,7 +41,7 @@ Physics.prototype.update = function(delta) {
 }
 
 Physics.prototype.addTank = function() {
-  var boxShape = new CANNON.Box(new CANNON.Vec3(0.3,0.1,0.35))
+  var boxShape = new CANNON.Box(new CANNON.Vec3(0.225,0.1,0.35))
     , boxBody = new CANNON.RigidBody(1000,boxShape, this.defaultMaterial);
 
   boxBody.position.set(0,20,0);

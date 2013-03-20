@@ -28,6 +28,10 @@ GameServer.prototype.initSockets = function() {
   setInterval(function() {
     that.updateActiveTanks();
   }, 1000);
+
+  setInterval(function() {
+    that.showStats();
+  }, 1000);
 }
 
 GameServer.prototype.init = function() {
@@ -38,6 +42,7 @@ GameServer.prototype.createTank = function(socket) {
   var that = this
     , tank = { socket: socket, body: this.physics.addTank(), uuid: uuid.v4() };
 
+  console.log('Adding tank with uuid: %s', tank.uuid);
   this.tanks.push(tank);
 
   socket.emit('init', { uuid: tank.uuid });
@@ -66,7 +71,7 @@ GameServer.prototype.removeTank = function(tankToRemove) {
 
   _.each(this.tanks, function(tank, idx) {
     if (tank.uuid == tankToRemove.uuid) {
-      that.tanks.splice(idx, 1);
+      console.log('Removing tank with uuid: %s', that.tanks.splice(idx, 1)[0].uuid);
     }
   });
 }
@@ -96,6 +101,10 @@ GameServer.prototype.update = function() {
 
 GameServer.prototype.updateActiveTanks = function() {
   this.io.sockets.emit('activeTanks', _.pluck(this.tanks, 'uuid'));
+}
+
+GameServer.prototype.showStats = function() {
+  console.log('%s - Tanks connected: %s', Date.now(), this.tanks.length);
 }
 
 module.exports = GameServer;

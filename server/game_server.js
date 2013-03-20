@@ -22,11 +22,15 @@ GameServer.prototype.initSockets = function() {
   });
 
   setInterval(function() {
-    that.update();
+    that.update(1/60);
   }, 1000/60);
 
   setInterval(function() {
-    that.updateActiveTanks();
+    that.fixedUpdate(1/120);
+  }, 1000/120);
+
+  setInterval(function() {
+    if (that.tanks.length) that.updateActiveTanks();
   }, 1000);
 
   setInterval(function() {
@@ -40,13 +44,22 @@ GameServer.prototype.init = function() {
 
 GameServer.prototype.createTank = function(socket) {
   var that = this
-    , tank = { socket: socket, body: this.physics.addTank(), uuid: uuid.v4() };
+    , tank = { socket: socket, body: this.physics.addTank(), uuid: uuid.v4(), keys: {} };
 
   console.log('Adding tank with uuid: %s', tank.uuid);
   this.tanks.push(tank);
 
   socket.emit('init', { uuid: tank.uuid });
 
+  socket.on('keyUp', function(key) {
+    tank.keys[key] = false;
+  });
+
+  socket.on('keyDown', function(key) {
+    tank.keys[key] = true;
+  });
+
+  /*
   socket.on('left', function() {
     that.physics.left(tank.body);
   });
@@ -62,6 +75,7 @@ GameServer.prototype.createTank = function(socket) {
   socket.on('reverse', function() {
     that.physics.reverse(tank.body);
   });
+  */
 
   return tank;
 }
@@ -93,9 +107,15 @@ GameServer.prototype.getUpdateObject = function() {
   return updateObj;
 }
 
-GameServer.prototype.update = function() {
+GameServer.prototype.update = function(delta) {
   if (this.tanks.length) {
     this.io.sockets.emit('update', this.getUpdateObject());
+  }
+}
+
+GameServer.prototype.fixedUpdate = function(delta) {
+  if (this.physics && this.tanks.length) {
+    this.physics.update(this.tanks, delta);
   }
 }
 

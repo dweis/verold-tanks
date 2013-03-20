@@ -1,4 +1,5 @@
-var CANNON = require('../vendor/cannon');
+var _ = require('underscore')
+  , CANNON = require('../vendor/cannon');
 
 function applyForce(body,worldPoint,force,dt){
   dt = dt || 1/60;
@@ -18,7 +19,7 @@ function Physics() {
   this.world.defaultContactMaterial.contactEquationRegularizationTime = 3;
 
   this.defaultMaterial = new CANNON.Material('default');
-  this.defaultContactMaterial = new CANNON.ContactMaterial(this.defaultMaterial, this.defaultMaterial, 0.05, 0.05);
+  this.defaultContactMaterial = new CANNON.ContactMaterial(this.defaultMaterial, this.defaultMaterial, 0.01, 0.01);
   this.world.addContactMaterial(this.defaultContactMaterial);
 
   var groundShape = new CANNON.Plane();
@@ -30,13 +31,26 @@ function Physics() {
   this.world.add(groundBody);
 
   this.groundBody = groundBody;
-
-  setInterval(function() {
-    that.update();
-  }, 1000 / 60);
 }
 
-Physics.prototype.update = function(delta) {
+Physics.prototype.update = function(tanks, delta) {
+  var that = this;
+
+  _.each(tanks, function(tank) {
+    if (tank.keys.W) {
+      that.forward(delta, tank.body);
+    }
+    if (tank.keys.S) {
+      that.reverse(delta, tank.body);
+    }
+    if (tank.keys.A) {
+      that.left(delta, tank.body);
+    }
+    if (tank.keys.D) {
+      that.right(delta, tank.body);
+    }
+  });
+
   this.world.step(delta);
 }
 
@@ -52,28 +66,26 @@ Physics.prototype.addTank = function() {
   return boxBody;
 }
 
-Physics.prototype.left = function(body) {
+Physics.prototype.left = function(delta, body) {
   body.angularVelocity.set(0,5,0);
 }
 
-Physics.prototype.right = function(body) {
+Physics.prototype.right = function(delta, body) {
   body.angularVelocity.set(0,-5,0);
 }
 
-Physics.prototype.forward = function(body) {
-  var dt = 1/60;
-  var f = 200;
+Physics.prototype.forward = function(delta, body) {
+  var f = 100;
   var force = body.quaternion.vmult(new CANNON.Vec3(0, 0, f));
   var worldPoint = new CANNON.Vec3(body.position.x, body.position.y, body.position.z);
-  applyForce(body,worldPoint,force,dt);
+  applyForce(body,worldPoint,force,delta);
 }
 
-Physics.prototype.reverse = function(body) {
-  var dt = 1/60;
-  var f = -150;
+Physics.prototype.reverse = function(delta, body) {
+  var f = -70;
   var force = body.quaternion.vmult(new CANNON.Vec3(0, 0, f));
   var worldPoint = new CANNON.Vec3(body.position.x, body.position.y, body.position.z);
-  applyForce(body, worldPoint,force,dt);
+  applyForce(body,worldPoint,force,delta);
 }
 
 module.exports = Physics;

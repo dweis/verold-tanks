@@ -29,10 +29,11 @@ GameClient.prototype.startup = function( ) {
       that.picker = that.veroldApp.getPicker();
       
       //Bind to input events to control the camera
-      that.veroldApp.on("keyDown", that.onKeyPress, that);
-      that.veroldApp.on("mouseUp", that.onMouseUp, that);
-      that.veroldApp.on("fixedUpdate", that.fixedUpdate, that );
-      that.veroldApp.on("update", that.update, that );
+      that.veroldApp.on('keyDown', that.onKeyDown, that);
+      that.veroldApp.on('keyUp', that.onKeyUp, that);
+      that.veroldApp.on('mouseUp', that.onMouseUp, that);
+      that.veroldApp.on('fixedUpdate', that.fixedUpdate, that );
+      that.veroldApp.on('update', that.update, that );
 
       if (that.veroldApp.isMobile()) {
         that.touchControls = new TouchControls(that.inputHandler.keyCodes);
@@ -121,10 +122,11 @@ GameClient.prototype.initSockets = function() {
 }
 
 GameClient.prototype.shutdown = function() {
-  this.veroldApp.off("keyDown", this.onKeyPress, this);
-  this.veroldApp.off("mouseUp", this.onMouseUp, this);
+  this.veroldApp.off('keyDown', this.onKeyDown, this);
+  this.veroldApp.off('keyUp', this.onKeyUp, this);
+  this.veroldApp.off('mouseUp', this.onMouseUp, this);
 
-  this.veroldApp.off("update", this.update, this );
+  this.veroldApp.off('update', this.update, this );
 }
 
 GameClient.prototype.update = function( delta ) {
@@ -139,15 +141,29 @@ GameClient.prototype.fixedUpdate = function( delta ) {
   }
 }
 
-GameClient.prototype.onKeyPress = function( event ) {
-	
+GameClient.prototype.onKeyDown = function( event ) {
 	var keyCodes = this.inputHandler.keyCodes;
-  if (event.keyCode === keyCodes['space'] ) {
-    if (!this.tank.isActive()) {
-      this.tank.setAsActive();
-    } else {
-      this.tank.setAsDestroyed();
-    }
+  if (event.keyCode === keyCodes['W']) {
+    this.socket.emit('keyDown', 'W');
+  } else if (event.keyCode === keyCodes['A']) {
+    this.socket.emit('keyDown', 'A');
+  } else if (event.keyCode === keyCodes['S']) {
+    this.socket.emit('keyDown', 'S');
+  } else if (event.keyCode === keyCodes['D']) {
+    this.socket.emit('keyDown', 'D');
+  }
+}
+
+GameClient.prototype.onKeyUp = function( event ) {
+	var keyCodes = this.inputHandler.keyCodes;
+  if (event.keyCode === keyCodes['W']) {
+    this.socket.emit('keyUp', 'W');
+  } else if (event.keyCode === keyCodes['A']) {
+    this.socket.emit('keyUp', 'A');
+  } else if (event.keyCode === keyCodes['S']) {
+    this.socket.emit('keyUp', 'S');
+  } else if (event.keyCode === keyCodes['D']) {
+    this.socket.emit('keyUp', 'D');
   }
 }
 

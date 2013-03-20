@@ -86,6 +86,7 @@ Tank.prototype.fixedUpdate = function() {
           this.gun.quaternion.multiply(this.tmpQuaternion);
         }
       }
+      /*
       if (this.inputHandler.keyDown('A')) {
         this.socket.emit('left');
       }
@@ -98,6 +99,7 @@ Tank.prototype.fixedUpdate = function() {
       if (this.inputHandler.keyDown('S')) {
         this.socket.emit('reverse');
       }
+      */
     }
   }
 }

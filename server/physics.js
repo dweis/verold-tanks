@@ -81,6 +81,10 @@ Physics.prototype.addTank = function() {
   return boxBody;
 }
 
+Physics.prototype.removeBody = function(body) {
+  this.world.remove(body);
+}
+
 Physics.prototype.left = function(delta, tank) {
   tank.body.angularVelocity.set(0,5,0);
 }

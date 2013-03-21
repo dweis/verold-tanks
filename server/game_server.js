@@ -13,7 +13,7 @@ function GameServer(io) {
 
   var that = this;
   this.physics.on('projectile', function(body, shooter) {
-    that.projectiles.push({ uuid: uuid.v4(), body: body, shooter: shooter.uuid });
+    that.projectiles.push({ uuid: uuid.v4(), body: body, shooter: shooter.uuid, ts: Date.now() });
   });
 }
 
@@ -43,6 +43,10 @@ GameServer.prototype.initSockets = function() {
   setInterval(function() {
     that.showStats();
   }, 1000);
+
+  setInterval(function() {
+    that.pruneOldProjectiles();
+  }, 2000);
 }
 
 GameServer.prototype.init = function() {
@@ -79,6 +83,7 @@ GameServer.prototype.removeTank = function(tankToRemove) {
 
   _.each(this.tanks, function(tank, idx) {
     if (tank.uuid == tankToRemove.uuid) {
+      that.physics.removeBody(tank.body);
       console.log('Removing tank with uuid: %s', that.tanks.splice(idx, 1)[0].uuid);
     }
   });
@@ -136,6 +141,18 @@ GameServer.prototype.showStats = function() {
 
   _.each(this.projectiles, function(projectile) {
     console.log(projectile.body.quaternion);
+  });
+}
+
+GameServer.prototype.pruneOldProjectiles = function() {
+  var that = this
+    , ts = Date.now();
+
+  _.each(this.projectiles, function(projectile, idx) {
+    if (projectile.ts < ts - 2000) {
+      that.physics.removeBody(projectile.body);
+      that.projectiles.splice(idx, 1);
+    }
   });
 }
 

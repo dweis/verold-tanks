@@ -84,7 +84,7 @@ GameClient.prototype.initSockets = function() {
   this.socket.on('kill', function(details) {
     _.each(that.tanks, function(tank) {
       if (tank.uuid == details.who && tank.active) {
-        alert(details.who + ' was killed by ' + details.by);
+        //alert(details.who + ' was killed by ' + details.by);
         tank.setAsDestroyed()
       }
     });

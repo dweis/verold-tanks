@@ -39,10 +39,13 @@ Physics.prototype.update = function(tanks, delta) {
 Physics.prototype.addTank = function(uuid) {
   var tank = { uuid: uuid, keys: {}, turretAngle: 0, gunAngle: 0 }, that = this;;
 
+  var x = -7.5 + Math.random() * 15;
+  var z = -7.5 + Math.random() * 15;
+
   var boxShape = new CANNON.Box(new CANNON.Vec3(0.225,0.1,0.35))
     , boxBody = new CANNON.RigidBody(1000,boxShape, this.defaultMaterial);
 
-  boxBody.position.set(0,1,0);
+  boxBody.position.set(x,1,z);
   boxBody.linearDamping = boxBody.angularDamping = 0.0;
 
   boxBody.type = 'tank';
@@ -170,14 +173,10 @@ Physics.prototype.fire = function(tank) {
   this.emit('projectile', boxBody, tank);
 
   boxBody.addEventListener('collide', function(e) {
-    // e.contact, e.with
-    //console.log('Collision', e.contact);
-    //
-    //
-   if (e.with.type == 'tank') {
-     e.with.active = false;
-     that.emit('kill', { who: e.with.uuid, by: tank.uuid });
-   }
+    if (e.with.type == 'tank' && e.with.uuid != tank.uui) {
+      e.with.active = false;
+      that.emit('kill', { who: e.with.uuid, by: tank.uuid });
+    }
   });
 }
 

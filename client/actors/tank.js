@@ -14,6 +14,7 @@ function Tank(uuid, template, scene, camera) {
 
   this.tmpVector3 = new THREE.Vector3();
   this.tmpQuaternion = new THREE.Quaternion();
+
 }
 
 Tank.prototype.init = function(callback) {

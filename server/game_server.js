@@ -15,6 +15,14 @@ function GameServer(io) {
   this.physics.on('projectile', function(body, shooter) {
     that.projectiles.push({ uuid: uuid.v4(), body: body, shooter: shooter.uuid, ts: Date.now() });
   });
+
+  this.physics.on('kill', function(details) {
+    that.io.sockets.emit('kill', details);
+  });
+
+  this.physics.on('activate', function(uuid) {
+    that.io.sockets.emit('activate', uuid);
+  });
 }
 
 GameServer.prototype.initSockets = function() {
@@ -56,8 +64,9 @@ GameServer.prototype.init = function() {
 
 GameServer.prototype.createTank = function(socket) {
   var that = this
-    , tank = { socket: socket, body: this.physics.addTank(), uuid: uuid.v4(), keys: {},
-          turretAngle: 0, gunAngle: 0 };
+    , tank = this.physics.addTank(uuid.v4());
+
+  tank.socket = socket;
 
   console.log('Adding tank with uuid: %s', tank.uuid);
   this.tanks.push(tank);

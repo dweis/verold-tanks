@@ -81,6 +81,23 @@ GameClient.prototype.initSockets = function() {
 
   this.socket = io.connect();
 
+  this.socket.on('kill', function(details) {
+    _.each(that.tanks, function(tank) {
+      if (tank.uuid == details.who && tank.active) {
+        alert(details.who + ' was killed by ' + details.by);
+        tank.setAsDestroyed()
+      }
+    });
+  });
+
+  this.socket.on('activate', function(uuid) {
+    _.each(that.tanks, function(tank) {
+      if (tank.uuid == uuid && !tank.active) {
+        tank.setAsActive()
+      }
+    });
+  });
+
   this.socket.on('update', function(updateObject) {
     while (updateObject.tanks.length >= 9) {
       var update = updateObject.tanks.splice(0,10)

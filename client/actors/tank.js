@@ -49,8 +49,10 @@ Tank.prototype.setAsDestroyed = function() {
   this.turret.visible = false;
   this.gun.visible = false;
 
-  this.camera.position.set( 0.5, 0.5, 1.5 );
-  this.camera.lookAt(new THREE.Vector3(0,0,0));
+  if (this.camera) {
+    this.camera.position.set( 0.5, 0.5, 1.5 );
+    this.camera.lookAt(new THREE.Vector3(0,0,0));
+  }
 }
 
 Tank.prototype.isActive = function() {

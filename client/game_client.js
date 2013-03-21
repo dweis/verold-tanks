@@ -17,8 +17,9 @@ GameClient = function( veroldApp ) {
 }
 
 GameClient.prototype.startup = function( ) {
-
   var that = this;
+
+  this.veroldApp.veroldEngine.Renderer.stats.domElement.hidden = false;
 
   this.veroldApp.loadScript('javascripts/OrbitControls.js', function() {
     that.veroldApp.loadScene( null, {

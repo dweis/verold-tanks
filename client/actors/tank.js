@@ -62,6 +62,7 @@ Tank.prototype.update = function() {
 }
 
 Tank.prototype.fixedUpdate = function() {
+  /*
   if (this.inputHandler) {
     if (this.active) {
       if (this.inputHandler.keyDown('leftArrow')) {
@@ -86,22 +87,9 @@ Tank.prototype.fixedUpdate = function() {
           this.gun.quaternion.multiply(this.tmpQuaternion);
         }
       }
-      /*
-      if (this.inputHandler.keyDown('A')) {
-        this.socket.emit('left');
-      }
-      if (this.inputHandler.keyDown('D')) {
-        this.socket.emit('right');
-      }
-      if (this.inputHandler.keyDown('W')) {
-        this.socket.emit('forward');
-      }
-      if (this.inputHandler.keyDown('S')) {
-        this.socket.emit('reverse');
-      }
-      */
     }
   }
+  */
 }
 
 Tank.prototype._initializeWithInstance = function(instance) {
@@ -140,8 +128,12 @@ Tank.prototype._initializeWithInstance = function(instance) {
       that.tank = obj.threeData;
     } else if (name.indexOf('Turret') == 0) {
       that.turret = obj.threeData;
+      that.turret.originalQuaternion = new THREE.Quaternion();
+      that.turret.originalQuaternion.copy(that.turret.quaternion);
     } else if (name.indexOf('Gun') == 0) {
       that.gun = obj.threeData;
+      that.gun.originalQuaternion = new THREE.Quaternion();
+      that.gun.originalQuaternion.copy(that.gun.quaternion);
     }
   });
 
@@ -155,6 +147,14 @@ Tank.prototype._initializeWithInstance = function(instance) {
 Tank.prototype.applyUpdate = function(update) {
   this.object.position.set(update[1], update[2], update[3]);
   this.object.quaternion.set(update[4], update[5], update[6], update[7]);
+
+  this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,0,1), update[8]);
+  this.turret.quaternion.copy(this.turret.originalQuaternion);
+  this.turret.quaternion.multiply(this.tmpQuaternion);
+
+  this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), update[9]);
+  this.gun.quaternion.copy(this.gun.originalQuaternion);
+  this.gun.quaternion.multiply(this.tmpQuaternion);
 }
 
 module.exports = Tank;

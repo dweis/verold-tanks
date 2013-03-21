@@ -44,7 +44,8 @@ GameServer.prototype.init = function() {
 
 GameServer.prototype.createTank = function(socket) {
   var that = this
-    , tank = { socket: socket, body: this.physics.addTank(), uuid: uuid.v4(), keys: {} };
+    , tank = { socket: socket, body: this.physics.addTank(), uuid: uuid.v4(), keys: {},
+          turretAngle: 0, gunAngle: 0 };
 
   console.log('Adding tank with uuid: %s', tank.uuid);
   this.tanks.push(tank);
@@ -58,24 +59,6 @@ GameServer.prototype.createTank = function(socket) {
   socket.on('keyDown', function(key) {
     tank.keys[key] = true;
   });
-
-  /*
-  socket.on('left', function() {
-    that.physics.left(tank.body);
-  });
-
-  socket.on('right', function() {
-    that.physics.right(tank.body);
-  });
-
-  socket.on('forward', function() {
-    that.physics.forward(tank.body);
-  });
-
-  socket.on('reverse', function() {
-    that.physics.reverse(tank.body);
-  });
-  */
 
   return tank;
 }
@@ -102,6 +85,8 @@ GameServer.prototype.getUpdateObject = function() {
     updateObj.tanks.push(tank.body.quaternion.y);
     updateObj.tanks.push(tank.body.quaternion.z);
     updateObj.tanks.push(tank.body.quaternion.w);
+    updateObj.tanks.push(tank.turretAngle);
+    updateObj.tanks.push(tank.gunAngle);
   });
 
   return updateObj;

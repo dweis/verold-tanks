@@ -37,7 +37,6 @@ GameClient.prototype.startup = function( ) {
 
       if (that.veroldApp.isMobile()) {
         that.touchControls = new TouchControls(that.inputHandler.keyCodes);
-        console.log(that.touchControls);
         that.touchControls.init();
       }
 
@@ -74,8 +73,8 @@ GameClient.prototype.initSockets = function() {
   this.socket.on('update', function(updateObject) {
     var c = 0;
 
-    while (updateObject.tanks.length >= 7) {
-      var update = updateObject.tanks.splice(0,8)
+    while (updateObject.tanks.length >= 9) {
+      var update = updateObject.tanks.splice(0,10)
         , found = false;
 
       _.each(that.tanks, function(tank) {
@@ -151,6 +150,14 @@ GameClient.prototype.onKeyDown = function( event ) {
     this.socket.emit('keyDown', 'S');
   } else if (event.keyCode === keyCodes['D']) {
     this.socket.emit('keyDown', 'D');
+  } else if (event.keyCode === keyCodes['leftArrow']) {
+    this.socket.emit('keyDown', 'leftArrow');
+  } else if (event.keyCode === keyCodes['rightArrow']) {
+    this.socket.emit('keyDown', 'rightArrow');
+  } else if (event.keyCode === keyCodes['upArrow']) {
+    this.socket.emit('keyDown', 'upArrow');
+  } else if (event.keyCode === keyCodes['downArrow']) {
+    this.socket.emit('keyDown', 'downArrow');
   }
 }
 
@@ -164,6 +171,14 @@ GameClient.prototype.onKeyUp = function( event ) {
     this.socket.emit('keyUp', 'S');
   } else if (event.keyCode === keyCodes['D']) {
     this.socket.emit('keyUp', 'D');
+  } else if (event.keyCode === keyCodes['leftArrow']) {
+    this.socket.emit('keyUp', 'leftArrow');
+  } else if (event.keyCode === keyCodes['rightArrow']) {
+    this.socket.emit('keyUp', 'rightArrow');
+  } else if (event.keyCode === keyCodes['upArrow']) {
+    this.socket.emit('keyUp', 'upArrow');
+  } else if (event.keyCode === keyCodes['downArrow']) {
+    this.socket.emit('keyUp', 'downArrow');
   }
 }
 

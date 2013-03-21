@@ -49,6 +49,18 @@ Physics.prototype.update = function(tanks, delta) {
     if (tank.keys.D) {
       that.right(delta, tank.body);
     }
+    if (tank.keys.leftArrow) {
+      tank.turretAngle += ((90  * Math.PI) / 180) * delta;
+    }
+    if (tank.keys.rightArrow) {
+      tank.turretAngle -= ((90  * Math.PI) / 180) * delta;
+    }
+    if (tank.keys.upArrow && tank.gunAngle >= 0) {
+      tank.gunAngle -= ((90  * Math.PI) / 180) * delta;
+    }
+    if (tank.keys.downArrow && tank.gunAngle <= 0.9) {
+      tank.gunAngle += ((90  * Math.PI) / 180) * delta;
+    }
   });
 
   this.world.step(delta);

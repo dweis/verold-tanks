@@ -108,7 +108,7 @@ GameClient.prototype.initSockets = function() {
   });
 
   this.socket.on('init', function(info) {
-    var tank = new Tank(info.uuid, that.model, that.mainScene, that.socket, that.inputHandler, that.camera);
+    var tank = new Tank(info.uuid, that.model, that.mainScene, that.camera);
 
     tank.init(function() {
       tank.setAsActive();

@@ -1,9 +1,7 @@
-function Tank(uuid, template, scene, socket, inputHandler, camera) {
+function Tank(uuid, template, scene, camera) {
   this.uuid = uuid;
   this.template = template;
-  this.socket = socket;
   this.scene = scene;
-  this.inputHandler = inputHandler;
   this.camera = camera;
   this.ready = false;
   this.active = false;
@@ -62,34 +60,6 @@ Tank.prototype.update = function() {
 }
 
 Tank.prototype.fixedUpdate = function() {
-  /*
-  if (this.inputHandler) {
-    if (this.active) {
-      if (this.inputHandler.keyDown('leftArrow')) {
-        this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,0,1), 0.05);
-        this.turret.quaternion.multiply(this.tmpQuaternion);
-      }
-      if (this.inputHandler.keyDown('rightArrow')) {
-        this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,0,1), -0.05);
-        this.turret.quaternion.multiply(this.tmpQuaternion);
-      }
-      if (this.inputHandler.keyDown('upArrow')) {
-        this.tmpVector3.setEulerFromQuaternion(this.gun.quaternion);
-        if (this.tmpVector3.y >= 0) {
-          this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), -0.05);
-          this.gun.quaternion.multiply(this.tmpQuaternion);
-        }
-      }
-      if (this.inputHandler.keyDown('downArrow')) {
-        this.tmpVector3.setEulerFromQuaternion(this.gun.quaternion);
-        if (this.tmpVector3.y <= 0.9) {
-          this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), 0.05);
-          this.gun.quaternion.multiply(this.tmpQuaternion);
-        }
-      }
-    }
-  }
-  */
 }
 
 Tank.prototype._initializeWithInstance = function(instance) {

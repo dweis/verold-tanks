@@ -173,7 +173,7 @@ Physics.prototype.fire = function(tank) {
   this.emit('projectile', boxBody, tank);
 
   boxBody.addEventListener('collide', function(e) {
-    if (e.with.type == 'tank' && e.with.uuid != tank.uui) {
+    if (e.with.type == 'tank' && e.with.uuid != tank.uuid) {
       e.with.active = false;
       that.emit('kill', { who: e.with.uuid, by: tank.uuid });
     }

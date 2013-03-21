@@ -1,4 +1,5 @@
 var Tank = require('./actors/tank')
+  , Projectile = require('./actors/projectile')
   , TouchControls = require('./controls/touch_controls');
 
 GameClient = function( veroldApp ) {
@@ -10,6 +11,7 @@ GameClient = function( veroldApp ) {
   this.tank;
   this.socket;
   this.tanks = [];
+  this.projectiles = [];
 }
 
 GameClient.prototype.startup = function( ) {
@@ -45,7 +47,7 @@ GameClient.prototype.startup = function( ) {
         that.mainScene = scene;
         
         var models = that.mainScene.getAllObjects( { "filter" :{ "model" : true }});
-        var model = that.model = models[ _.keys( models )[0] ];
+        var model = that.tankModel = that.mainScene.getObject('51446660ca7df102000009c0');
 
         that.mainScene.removeChildObject(model);
 
@@ -75,8 +77,6 @@ GameClient.prototype.initSockets = function() {
   this.socket = io.connect();
 
   this.socket.on('update', function(updateObject) {
-    var c = 0;
-
     while (updateObject.tanks.length >= 9) {
       var update = updateObject.tanks.splice(0,10)
         , found = false;
@@ -89,11 +89,33 @@ GameClient.prototype.initSockets = function() {
       });
 
       if (!found) {
-        var tank = new Tank(update[0], that.model, that.mainScene);
+        var tank = new Tank(update[0], that.tankModel, that.mainScene);
 
         tank.init(function() {
           tank.applyUpdate(update);
           that.tanks.push(tank);
+        });
+      }
+    }
+
+    while (updateObject.projectiles.length >= 8) {
+      var update = updateObject.projectiles.splice(0,9)
+        , found = false;
+
+
+      _.each(that.projectiles, function(projectile) {
+        if (projectile.uuid == update[0]) {
+          found = true;
+          projectile.applyUpdate(update);
+        }
+      });
+
+      if (!found) {
+        var projectile = new Projectile(update[0], update[1], that.mainScene);
+
+        projectile.init(function() {
+          projectile.applyUpdate(update);
+          that.projectiles.push(projectile);
         });
       }
     }
@@ -112,7 +134,7 @@ GameClient.prototype.initSockets = function() {
   });
 
   this.socket.on('init', function(info) {
-    var tank = new Tank(info.uuid, that.model, that.mainScene, that.camera);
+    var tank = new Tank(info.uuid, that.tankModel, that.mainScene, that.camera);
 
     tank.init(function() {
       tank.setAsActive();
@@ -187,6 +209,8 @@ GameClient.prototype.onKeyUp = function( event ) {
     this.socket.emit('keyUp', 'upArrow');
   } else if (event.keyCode === keyCodes['downArrow']) {
     this.socket.emit('keyUp', 'downArrow');
+  } else if (event.keyCode === keyCodes['space']) {
+    this.socket.emit('fire');
   }
 }
 

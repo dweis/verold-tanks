@@ -1,4 +1,5 @@
-var _ = require('underscore')
+var events = require('events')
+  , _ = require('underscore')
   , CANNON = require('../vendor/cannon');
 
 function applyForce(body,worldPoint,force,dt){
@@ -33,21 +34,23 @@ function Physics() {
   this.groundBody = groundBody;
 }
 
+Physics.prototype = new events.EventEmitter;
+
 Physics.prototype.update = function(tanks, delta) {
   var that = this;
 
   _.each(tanks, function(tank) {
     if (tank.keys.W) {
-      that.forward(delta, tank.body);
+      that.forward(delta, tank);
     }
     if (tank.keys.S) {
-      that.reverse(delta, tank.body);
+      that.reverse(delta, tank);
     }
     if (tank.keys.A) {
-      that.left(delta, tank.body);
+      that.left(delta, tank);
     }
     if (tank.keys.D) {
-      that.right(delta, tank.body);
+      that.right(delta, tank);
     }
     if (tank.keys.leftArrow) {
       tank.turretAngle += ((90  * Math.PI) / 180) * delta;
@@ -56,10 +59,10 @@ Physics.prototype.update = function(tanks, delta) {
       tank.turretAngle -= ((90  * Math.PI) / 180) * delta;
     }
     if (tank.keys.upArrow && tank.gunAngle >= 0) {
-      tank.gunAngle -= ((90  * Math.PI) / 180) * delta;
+      tank.gunAngle = Math.max(0, tank.gunAngle - ((90  * Math.PI) / 180) * delta);
     }
-    if (tank.keys.downArrow && tank.gunAngle <= 0.9) {
-      tank.gunAngle += ((90  * Math.PI) / 180) * delta;
+    if (tank.keys.downArrow && tank.gunAngle <= 1) {
+      tank.gunAngle = Math.min(1, tank.gunAngle + ((90  * Math.PI) / 180) * delta);
     }
   });
 
@@ -78,26 +81,74 @@ Physics.prototype.addTank = function() {
   return boxBody;
 }
 
-Physics.prototype.left = function(delta, body) {
-  body.angularVelocity.set(0,5,0);
+Physics.prototype.left = function(delta, tank) {
+  tank.body.angularVelocity.set(0,5,0);
 }
 
-Physics.prototype.right = function(delta, body) {
-  body.angularVelocity.set(0,-5,0);
+Physics.prototype.right = function(delta, tank) {
+  tank.body.angularVelocity.set(0,-5,0);
 }
 
-Physics.prototype.forward = function(delta, body) {
+Physics.prototype.forward = function(delta, tank) {
   var f = 100;
-  var force = body.quaternion.vmult(new CANNON.Vec3(0, 0, f));
-  var worldPoint = new CANNON.Vec3(body.position.x, body.position.y, body.position.z);
-  applyForce(body,worldPoint,force,delta);
+  var force = tank.body.quaternion.vmult(new CANNON.Vec3(0, 0, f));
+  var worldPoint = new CANNON.Vec3(tank.body.position.x, tank.body.position.y, tank.body.position.z);
+  applyForce(tank.body,worldPoint,force,delta);
 }
 
-Physics.prototype.reverse = function(delta, body) {
+Physics.prototype.reverse = function(delta, tank) {
   var f = -70;
-  var force = body.quaternion.vmult(new CANNON.Vec3(0, 0, f));
-  var worldPoint = new CANNON.Vec3(body.position.x, body.position.y, body.position.z);
-  applyForce(body,worldPoint,force,delta);
+  var force = tank.body.quaternion.vmult(new CANNON.Vec3(0, 0, f));
+  var worldPoint = new CANNON.Vec3(tank.body.position.x, tank.body.position.y, tank.body.position.z);
+  applyForce(tank.body,worldPoint,force,delta);
+}
+
+Physics.prototype.fire = function(tank) {
+  var direction = new CANNON.Quaternion()
+    , q = new CANNON.Quaternion()
+    , force
+    , worldPoint
+    , boxShape
+    , boxBody
+    , f = 50;
+
+  console.log('Tank %s has fired Turret Angle: %s Gun Angle: %s', tank.uuid, tank.turretAngle, tank.gunAngle);
+
+  boxShape = new CANNON.Box(new CANNON.Vec3(0.03, 0.03, 0.09))
+  boxBody = new CANNON.RigidBody(10,boxShape, this.defaultMaterial);
+
+  boxBody.position.set(tank.body.position.x, tank.body.position.y + 0.3, tank.body.position.z);
+  boxBody.linearDamping = boxBody.angularDamping = 0.1;
+
+  q = new CANNON.Quaternion();
+  q.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), tank.gunAngle);
+
+  direction = q.mult(direction)
+
+  q = new CANNON.Quaternion();
+  q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), tank.turretAngle);
+
+  direction = q.mult(direction);
+
+  var tmpVec = new CANNON.Vec3();
+  tank.body.quaternion.toEuler(tmpVec); console.log(tmpVec);
+
+  q = new CANNON.Quaternion();
+  q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), tmpVec.y);
+
+  direction = q.mult(direction)
+
+  direction.copy(boxBody.quaternion);
+
+  this.world.add(boxBody);
+
+  force = boxBody.quaternion.vmult(new CANNON.Vec3(0, 0, f));
+
+  worldPoint = new CANNON.Vec3(boxBody.position.x, boxBody.position.y, boxBody.position.z);
+
+  applyForce(boxBody, worldPoint, force, 0.25);
+
+  this.emit('projectile', boxBody, tank);
 }
 
 module.exports = Physics;

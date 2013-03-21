@@ -6,8 +6,15 @@ var _ = require('underscore')
 function GameServer(io) {
   this.io = io;
 
-  this.physics = new Physics();
   this.tanks = [];
+  this.projectiles = [];
+
+  this.physics = new Physics();
+
+  var that = this;
+  this.physics.on('projectile', function(body, shooter) {
+    that.projectiles.push({ uuid: uuid.v4(), body: body, shooter: shooter.uuid });
+  });
 }
 
 GameServer.prototype.initSockets = function() {
@@ -60,6 +67,10 @@ GameServer.prototype.createTank = function(socket) {
     tank.keys[key] = true;
   });
 
+  socket.on('fire', function() {
+    that.physics.fire(tank);
+  });
+
   return tank;
 }
 
@@ -89,6 +100,18 @@ GameServer.prototype.getUpdateObject = function() {
     updateObj.tanks.push(tank.gunAngle);
   });
 
+  _.each(this.projectiles, function(projectile) {
+    updateObj.projectiles.push(projectile.uuid);
+    updateObj.projectiles.push(projectile.shooter);
+    updateObj.projectiles.push(projectile.body.position.x);
+    updateObj.projectiles.push(projectile.body.position.y);
+    updateObj.projectiles.push(projectile.body.position.z);
+    updateObj.projectiles.push(projectile.body.quaternion.x);
+    updateObj.projectiles.push(projectile.body.quaternion.y);
+    updateObj.projectiles.push(projectile.body.quaternion.z);
+    updateObj.projectiles.push(projectile.body.quaternion.w);
+  });
+
   return updateObj;
 }
 
@@ -110,6 +133,10 @@ GameServer.prototype.updateActiveTanks = function() {
 
 GameServer.prototype.showStats = function() {
   console.log('%s - Tanks connected: %s', Date.now(), this.tanks.length);
+
+  _.each(this.projectiles, function(projectile) {
+    console.log(projectile.body.quaternion);
+  });
 }
 
 module.exports = GameServer;

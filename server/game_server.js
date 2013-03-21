@@ -29,15 +29,16 @@ GameServer.prototype.initSockets = function() {
   });
 
   setInterval(function() {
-    that.update(1/60);
+    that.update(1/30);
+  }, 1000/30);
+
+  setInterval(function() {
+    that.fixedUpdate(1/60);
   }, 1000/60);
 
   setInterval(function() {
-    that.fixedUpdate(1/120);
-  }, 1000/120);
-
-  setInterval(function() {
     if (that.tanks.length) that.updateActiveTanks();
+    if (that.tanks.length) that.updateActiveProjectiles();
   }, 1000);
 
   setInterval(function() {
@@ -136,12 +137,12 @@ GameServer.prototype.updateActiveTanks = function() {
   this.io.sockets.emit('activeTanks', _.pluck(this.tanks, 'uuid'));
 }
 
-GameServer.prototype.showStats = function() {
-  console.log('%s - Tanks connected: %s', Date.now(), this.tanks.length);
+GameServer.prototype.updateActiveProjectiles = function() {
+  this.io.sockets.emit('activeProjectiles', _.pluck(this.projectiles, 'uuid'));
+}
 
-  _.each(this.projectiles, function(projectile) {
-    console.log(projectile.body.quaternion);
-  });
+GameServer.prototype.showStats = function() {
+  console.log('%s - Tanks connected: %s Projectiles: %s', Date.now(), this.tanks.length, this.projectiles.length);
 }
 
 GameServer.prototype.pruneOldProjectiles = function() {

@@ -73,7 +73,7 @@ Physics.prototype.addTank = function() {
   var boxShape = new CANNON.Box(new CANNON.Vec3(0.225,0.1,0.35))
     , boxBody = new CANNON.RigidBody(1000,boxShape, this.defaultMaterial);
 
-  boxBody.position.set(0,20,0);
+  boxBody.position.set(0,1,0);
   boxBody.linearDamping = boxBody.angularDamping = 0.5;
 
   this.world.add(boxBody);
@@ -118,11 +118,8 @@ Physics.prototype.fire = function(tank) {
 
   console.log('Tank %s has fired Turret Angle: %s Gun Angle: %s', tank.uuid, tank.turretAngle, tank.gunAngle);
 
-  boxShape = new CANNON.Box(new CANNON.Vec3(0.03, 0.03, 0.09))
+  boxShape = new CANNON.Box(new CANNON.Vec3(0.015, 0.015, 0.05))
   boxBody = new CANNON.RigidBody(10,boxShape, this.defaultMaterial);
-
-  boxBody.position.set(tank.body.position.x, tank.body.position.y + 0.3, tank.body.position.z);
-  boxBody.linearDamping = boxBody.angularDamping = 0.1;
 
   q = new CANNON.Quaternion();
   q.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), tank.gunAngle);
@@ -135,7 +132,7 @@ Physics.prototype.fire = function(tank) {
   direction = q.mult(direction);
 
   var tmpVec = new CANNON.Vec3();
-  tank.body.quaternion.toEuler(tmpVec); console.log(tmpVec);
+  tank.body.quaternion.toEuler(tmpVec);
 
   q = new CANNON.Quaternion();
   q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), tmpVec.y);
@@ -149,6 +146,11 @@ Physics.prototype.fire = function(tank) {
   force = boxBody.quaternion.vmult(new CANNON.Vec3(0, 0, f));
 
   worldPoint = new CANNON.Vec3(boxBody.position.x, boxBody.position.y, boxBody.position.z);
+
+  boxBody.position.set(tank.body.position.x, tank.body.position.y, tank.body.position.z);
+  boxBody.position.vadd(boxBody.quaternion.vmult(new CANNON.Vec3(0, 0.15, 0.3)), boxBody.position);
+  //boxBody.position.vadd(tank.body.quaternion.vmult(new CANNON.Vec3(0, 0, 10), boxBody.position));
+  boxBody.linearDamping = boxBody.angularDamping = 0.1;
 
   applyForce(boxBody, worldPoint, force, 0.25);
 

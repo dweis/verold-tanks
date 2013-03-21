@@ -9,6 +9,8 @@ GameClient = function( veroldApp ) {
   this.camera;
   this.cameraControls;
   this.tank;
+  this.tankModel;
+  this.bulletModel;
   this.socket;
   this.tanks = [];
   this.projectiles = [];
@@ -47,9 +49,11 @@ GameClient.prototype.startup = function( ) {
         that.mainScene = scene;
         
         var models = that.mainScene.getAllObjects( { "filter" :{ "model" : true }});
-        var model = that.tankModel = that.mainScene.getObject('51446660ca7df102000009c0');
+        that.tankModel = that.mainScene.getObject('51446660ca7df102000009c0');
+        that.bulletModel = that.mainScene.getObject('514b346d97481f020000020e');
 
-        that.mainScene.removeChildObject(model);
+        that.mainScene.removeChildObject(that.tankModel);
+        that.mainScene.removeChildObject(that.bulletModel);
 
         //Create the camera
         that.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
@@ -111,7 +115,7 @@ GameClient.prototype.initSockets = function() {
       });
 
       if (!found) {
-        var projectile = new Projectile(update[0], update[1], that.mainScene);
+        var projectile = new Projectile(update[0], update[1], that.bulletModel, that.mainScene);
 
         projectile.init(function() {
           projectile.applyUpdate(update);
@@ -129,6 +133,15 @@ GameClient.prototype.initSockets = function() {
       if (!_.contains(activeTanks, tank.uuid)) {
         that.mainScene.threeData.remove(tank.object);
         that.tanks.splice(idx, 1);
+      }
+    });
+  });
+
+  this.socket.on('activeProjectiles', function(activeProjectiles) {
+    _.each(that.projectiles, function(projectile, idx) {
+      if (!_.contains(activeProjectiles, projectile.uuid)) {
+        that.mainScene.threeData.remove(projectile.object);
+        that.projectiles.splice(idx, 1);
       }
     });
   });

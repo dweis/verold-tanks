@@ -78,13 +78,13 @@ Tank.prototype._initializeWithInstance = function(instance) {
 
   this.instance.threeData.position.y -= 0.1;
 
-  //0.4,0.1,0.4
+  /*
   var geometry = new THREE.CubeGeometry( 0.45, 0.2, 0.7 );
   var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
   var mesh = new THREE.Mesh( geometry, material );
 
   this.object.add(mesh);
-
+  */
 
   if (this.camera) {
     this.object.add(this.camera);

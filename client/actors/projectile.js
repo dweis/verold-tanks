@@ -1,10 +1,11 @@
-function Projectile(uuid, tankUuid, scene) {
+function Projectile(uuid, tankUuid, template, scene) {
   console.log('new projectile!');
   this.uuid = uuid;
   this.tankUuid = tankUuid;
   this.scene = scene;
   this.ready = false;
   this.active = false;
+  this.template = template;
 }
 
 Projectile.prototype.init = function(callback) {
@@ -12,20 +13,27 @@ Projectile.prototype.init = function(callback) {
 
   if (this.ready) return callback();
 
-  this.object = new THREE.Object3D();
-  this.object.useQuaternion = true;
+  this.template.clone({ success_hierarchy: function(instance) {
+    that.scene.addChildObject(instance);
 
-  var geometry = new THREE.CubeGeometry( 0.05, 0.05, 0.15 );
-  var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } );
-  var mesh = new THREE.Mesh( geometry, material );
+    that.object = new THREE.Object3D();
+    that.object.useQuaternion = true;
 
-  this.object.add(mesh);
+    that.object.add(instance.threeData);
 
-  this.scene.threeData.add(this.object);
+    /*
+    var geometry = new THREE.CubeGeometry( 0.05, 0.05, 0.15 );
+    var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+    var mesh = new THREE.Mesh( geometry, material );
+    that.object.add(mesh);
+   */
 
-  this.ready = true;
+    that.scene.threeData.add(that.object);
 
-  return callback();
+    that.ready = true;
+
+    return callback();
+  }});
 }
 
 Projectile.prototype.update = function() {

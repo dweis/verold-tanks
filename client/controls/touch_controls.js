@@ -1,9 +1,15 @@
-function TouchControls(keySet) {
-  this.keySet = keySet;
+function TouchControls(callback) {
+  this.callback = callback;
 }
 
 TouchControls.prototype.init = function() {
   var that = this;
+
+  var div = $('<div>', { style: 'position: absolute; left: 50%; top: 50%; margin-left: -100px; margin-top: -100px; width: 200px; height: 200px; z-index: 10' }).appendTo('body');
+
+  $(div).click(function() {
+    that.callback('fire');
+  });
 
   GameController.init({
     left: {
@@ -11,38 +17,38 @@ TouchControls.prototype.init = function() {
       dpad: {
         up: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['W']);
-            GameController.simulateKeyEvent('down', that.keySet['W']);
+            that.callback('press', 'W');
+            that.callback('down', 'W');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['W']);
+            that.callback('up', 'W');
           }
         },
         down: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['S']);
-            GameController.simulateKeyEvent('down', that.keySet['S']);
+            that.callback('press', 'S');
+            that.callback('down', 'S');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['S']);
+            that.callback('up', 'S');
           }
         },
         left: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['A']);
-            GameController.simulateKeyEvent('down', that.keySet['A']);
+            that.callback('press', 'A');
+            that.callback('down', 'A');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['A']);
+            that.callback('up', 'A');
           }
         },
         right: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['D']);
-            GameController.simulateKeyEvent('down', that.keySet['D']);
+            that.callback('press', 'D');
+            that.callback('down', 'D');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['D']);
+            that.callback('up', 'D');
           }
         }
       }
@@ -52,38 +58,38 @@ TouchControls.prototype.init = function() {
       dpad: {
         up: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['upArrow']);
-            GameController.simulateKeyEvent('down', that.keySet['upArrow']);
+            that.callback('press', 'upArrow');
+            that.callback('down', 'upArrow');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['upArrow']);
+            that.callback('up', 'upArrow');
           }
         },
         down: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['downArrow']);
-            GameController.simulateKeyEvent('down', that.keySet['downArrow']);
+            that.callback('press', 'downArrow');
+            that.callback('down', 'downArrow');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['downArrow']);
+            that.callback('up', 'downArrow');
           }
         },
         left: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['leftArrow']);
-            GameController.simulateKeyEvent('down', that.keySet['leftArrow']);
+            that.callback('press', 'leftArrow');
+            that.callback('down', 'leftArrow');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['leftArrow']);
+            that.callback('up', 'leftArrow');
           }
         },
         right: {
           touchStart: function(details) {
-            GameController.simulateKeyEvent('press', that.keySet['rightArrow']);
-            GameController.simulateKeyEvent('down', that.keySet['rightArrow']);
+            that.callback('press', 'rightArrow');
+            that.callback('down', 'rightArrow');
           },
           touchEnd: function(details) {
-            GameController.simulateKeyEvent('up', that.keySet['rightArrow']);
+            that.callback('up', 'rightArrow');
           }
         }
       }

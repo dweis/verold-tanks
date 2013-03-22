@@ -14,6 +14,7 @@ TouchControls.prototype.init = function() {
   GameController.init({
     left: {
       type: 'dpad',
+      position: { left: '10%' },
       dpad: {
         up: {
           touchStart: function(details) {
@@ -55,6 +56,7 @@ TouchControls.prototype.init = function() {
     },
     right: {
       type: 'dpad',
+      position: { right: '20%' },
       dpad: {
         up: {
           touchStart: function(details) {

@@ -13,7 +13,7 @@ function Physics() {
   this.world.defaultContactMaterial.contactEquationRegularizationTime = 10;
 
   this.defaultMaterial = new CANNON.Material('default');
-  this.defaultContactMaterial = new CANNON.ContactMaterial(this.defaultMaterial, this.defaultMaterial, 0.02, 0.02);
+  this.defaultContactMaterial = new CANNON.ContactMaterial(this.defaultMaterial, this.defaultMaterial, 0.5, 0.2);
   this.world.addContactMaterial(this.defaultContactMaterial);
 
   var groundShape = new CANNON.Plane();
@@ -121,8 +121,6 @@ Physics.prototype.reverse = function(delta, tank) {
 
 // REFACTOR THIS
 Physics.prototype.fire = function(tank) {
-  if (tank.body.active == false) return;
-
   var that = this
     , direction = new CANNON.Quaternion()
     , tmpVec = new CANNON.Vec3()
@@ -131,7 +129,12 @@ Physics.prototype.fire = function(tank) {
     , worldPoint
     , boxShape
     , boxBody
-    , f = 40;
+    , f = 40
+    , time = Date.now();
+
+  if (tank.body.active == false || tank.lastFire + 750 > time) return;
+
+  tank.lastFire = time;
 
   console.log('Tank %s has fired Turret Angle: %s Gun Angle: %s', tank.uuid, tank.turretAngle, tank.gunAngle);
 

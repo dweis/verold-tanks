@@ -1,6 +1,13 @@
 var uuid = require('node-uuid')
   , CANNON = require('../../vendor/cannon');
 
+var PROJECTILE_FORCE = 100
+  , PROJECTILE_MASS = 25
+  , PROJECTILE_SHAPE = new CANNON.Box(new CANNON.Vec3(0.015, 0.015, 0.05))
+  , PROJECTILE_OFFSET = new CANNON.Vec3(0, 0.05, 0.4)
+  , PROJECTILE_LINEAR_DAMPING = 0.3
+  , PROJECTILE_ANGULAR_DAMPING = 0.3;
+
 function Projectile(tank) {
   this.uuid = uuid.v4();
   this.tank = tank;
@@ -12,62 +19,62 @@ function Projectile(tank) {
 
 Projectile.prototype.init = function() {
   var that = this
-    , direction = new CANNON.Quaternion()
-    , tmpVec = new CANNON.Vec3()
-    , q = new CANNON.Quaternion()
-    , force
-    , worldPoint
-    , boxShape
-    , boxBody
-    , f = 40;
+    , offset
+    , worldPoint = new CANNON.Vec3();
 
-  boxShape = new CANNON.Box(new CANNON.Vec3(0.015, 0.015, 0.05))
-  boxBody = new CANNON.RigidBody(10,boxShape);
+  this.body = new CANNON.RigidBody(PROJECTILE_MASS, PROJECTILE_SHAPE);
+  this.body.linearDamping = PROJECTILE_LINEAR_DAMPING;
+  this.body.angularDamping = PROJECTILE_ANGULAR_DAMPING;
 
-  q = new CANNON.Quaternion();
-  q.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), this.tank.gunAngle);
+  this.computeQuaternion().copy(this.body.quaternion);
 
-  direction = q.mult(direction)
+  this.tank.body.position.copy(this.body.position);
 
-  q = new CANNON.Quaternion();
-  q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), this.tank.turretAngle);
+  offset = this.body.quaternion.vmult(PROJECTILE_OFFSET);
+  this.body.position.vadd(offset, this.body.position);
 
-  direction = q.mult(direction);
+  this.tank.body.position.copy(worldPoint);
 
-  this.tank.body.quaternion.toEuler(tmpVec);
+  this.body.applyImpulse(worldPoint, this.computeForce(), 0.1);
 
-  q = new CANNON.Quaternion();
-  q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), tmpVec.y);
-
-  direction = q.mult(direction)
-
-  direction.copy(boxBody.quaternion);
-
-  force = boxBody.quaternion.vmult(new CANNON.Vec3(0, 0, f));
-
-  worldPoint = new CANNON.Vec3(boxBody.position.x, boxBody.position.y, boxBody.position.z);
-
-  boxBody.position.set(this.tank.body.position.x, this.tank.body.position.y, this.tank.body.position.z);
-  boxBody.position.vadd(boxBody.quaternion.vmult(new CANNON.Vec3(0, 0.11, 0.4)), boxBody.position);
-  boxBody.linearDamping = boxBody.angularDamping = 0.0;
-
-  boxBody.applyImpulse(worldPoint, force, 0.25);
-
-  var collisionListener = function(e) {
+  this.collisionListener = function(e) {
     if (e.with.parentObject) {
       if (e.with.parentObject.type == 'tank' && e.with.parentObject.uuid != that.tank.uuid) {
         e.with.parentObject.active = false;
         that.physics.emit('kill', { who: e.with.parentObject.uuid, by: that.tank.uuid });
-        boxBody.removeEventListener('collide', collisionListener);
+        that.body.removeEventListener('collide', that.collisionListener);
       }
     }
   }
 
-  boxBody.addEventListener('collide', collisionListener);
-
-  this.body = boxBody;
+  this.body.addEventListener('collide', this.collisionListener);
 
   this.physics.add(this);
+}
+
+Projectile.prototype.computeQuaternion = function() {
+  var tmpQuaternion = new CANNON.Quaternion()
+    , direction = new CANNON.Quaternion()
+    , tmpVec = new CANNON.Vec3();
+
+  // Apply gun angle rotation
+  tmpQuaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), this.tank.gunAngle);
+  direction = tmpQuaternion.mult(direction)
+
+  // Apply turret angle rotation
+  tmpQuaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), this.tank.turretAngle);
+  direction = tmpQuaternion.mult(direction);
+
+  // Finally apply tank body rotation
+  this.tank.body.quaternion.toEuler(tmpVec);
+  tmpQuaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), tmpVec.y);
+  direction = tmpQuaternion.mult(direction)
+
+  return direction;
+}
+
+Projectile.prototype.computeForce = function() {
+  return this.body.quaternion.vmult(new CANNON.Vec3(0, 0, PROJECTILE_FORCE));
 }
 
 module.exports = Projectile;

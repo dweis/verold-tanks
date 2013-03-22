@@ -1,5 +1,4 @@
-var events = require('events')
-  , uuid = require('node-uuid')
+var uuid = require('node-uuid')
   , CANNON = require('../../vendor/cannon')
   , Projectile = require('./projectile');
 
@@ -14,8 +13,6 @@ function Tank(physics) {
   this.active = true;
   this.lastFire = 0;
 }
-
-Tank.prototype = new events.EventEmitter();
 
 Tank.prototype.preStep = function() {
   // fixme, get real delta for frame

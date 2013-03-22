@@ -1,5 +1,4 @@
-var events = require('events')
-  , uuid = require('node-uuid')
+var uuid = require('node-uuid')
   , CANNON = require('../../vendor/cannon');
 
 function Projectile(tank) {
@@ -10,8 +9,6 @@ function Projectile(tank) {
   this.type = 'projectile';
   this.timeShot = Date.now();
 }
-
-Projectile.prototype = new events.EventEmitter();
 
 Projectile.prototype.init = function() {
   var that = this

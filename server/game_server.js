@@ -1,5 +1,4 @@
 var _ = require('underscore')
-  , uuid = require('node-uuid')
   , Physics = require('./physics')
   , CANNON = require('../vendor/cannon');
 
@@ -12,8 +11,8 @@ function GameServer(io) {
   this.physics = new Physics();
 
   var that = this;
-  this.physics.on('projectile', function(body, shooter) {
-    that.projectiles.push({ uuid: uuid.v4(), body: body, shooter: shooter.uuid, ts: Date.now() });
+  this.physics.on('projectile', function(projectile) {
+    that.projectiles.push(projectile);
   });
 
   this.physics.on('kill', function(details) {
@@ -64,7 +63,7 @@ GameServer.prototype.init = function() {
 
 GameServer.prototype.createTank = function(socket) {
   var that = this
-    , tank = this.physics.addTank(uuid.v4());
+    , tank = this.physics.addTank();
 
   tank.socket = socket;
 
@@ -82,7 +81,12 @@ GameServer.prototype.createTank = function(socket) {
   });
 
   socket.on('fire', function() {
-    that.physics.fire(tank);
+    if (tank.active) {
+      tank.fire();
+    } else {
+      tank.active = true;
+      that.physics.emit('activate', tank.uuid);
+    }
   });
 
   return tank;
@@ -93,7 +97,7 @@ GameServer.prototype.removeTank = function(tankToRemove) {
 
   _.each(this.tanks, function(tank, idx) {
     if (tank.uuid == tankToRemove.uuid) {
-      that.physics.removeBody(tank.body);
+      that.physics.remove(tank);
       console.log('Removing tank with uuid: %s', that.tanks.splice(idx, 1)[0].uuid);
     }
   });
@@ -151,16 +155,16 @@ GameServer.prototype.updateActiveProjectiles = function() {
 }
 
 GameServer.prototype.showStats = function() {
-  console.log('%s - Tanks connected: %s Projectiles: %s', Date.now(), this.tanks.length, this.projectiles.length);
+  console.log('%s - Tanks connected: %s Projectiles: %s', new Date(), this.tanks.length, this.projectiles.length);
 }
 
 GameServer.prototype.pruneOldProjectiles = function() {
   var that = this
-    , ts = Date.now();
+    , time = Date.now();
 
   _.each(this.projectiles, function(projectile, idx) {
-    if (projectile.ts < ts - 2000) {
-      that.physics.removeBody(projectile.body);
+    if (projectile.timeShot < time - 2000) {
+      that.physics.remove(projectile);
       that.projectiles.splice(idx, 1);
     }
   });

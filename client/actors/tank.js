@@ -70,6 +70,8 @@ Tank.prototype._initializeWithInstance = function(instance) {
 
   this.instance = instance;
 
+  this.instance.threeData.position.set(0,0,0);
+
   // Temporarily remove object, we'll create a new Object3D to attach it to
   this.scene.threeData.remove(instance.threeData);
 

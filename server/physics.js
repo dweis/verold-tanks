@@ -51,10 +51,6 @@ Physics.prototype.add = function(object) {
   this.objects.push(object);
 
   this.world.add(object.body);
-
-  _.each(this.objects, function(object) {
-    console.log(object.uuid, object.type);
-  });
 }
 
 Physics.prototype.remove = function(object) {

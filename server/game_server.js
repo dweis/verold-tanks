@@ -67,7 +67,7 @@ GameServer.prototype.createTank = function(socket) {
 
   tank.socket = socket;
 
-  console.log('Adding tank with uuid: %s', tank.uuid);
+  console.log('%s - Adding tank with uuid: %s', new Date(), tank.uuid);
   this.tanks.push(tank);
 
   socket.emit('init', { uuid: tank.uuid });
@@ -98,7 +98,7 @@ GameServer.prototype.removeTank = function(tankToRemove) {
   _.each(this.tanks, function(tank, idx) {
     if (tank.uuid == tankToRemove.uuid) {
       that.physics.remove(tank);
-      console.log('Removing tank with uuid: %s', that.tanks.splice(idx, 1)[0].uuid);
+      console.log('%s - Removing tank with uuid: %s', new Date(), that.tanks.splice(idx, 1)[0].uuid);
     }
   });
 }

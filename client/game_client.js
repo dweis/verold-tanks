@@ -1,6 +1,7 @@
 var Tank = require('./actors/tank')
   , Projectile = require('./actors/projectile')
-  , TouchControls = require('./controls/touch_controls');
+  , TouchControls = require('./controls/touch_controls')
+  , Map = require('./map');
 
 GameClient = function( veroldApp ) {
 
@@ -64,6 +65,9 @@ GameClient.prototype.startup = function( ) {
         that.mainScene.removeChildObject(that.tankModel);
         that.mainScene.removeChildObject(that.bulletModel);
 
+        that.map = new Map(scene);
+        that.map.init();
+
         //Create the camera
         that.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
         that.camera.up.set( 0, 1, 0 );
@@ -104,6 +108,10 @@ GameClient.prototype.initSockets = function() {
         tank.setAsActive()
       }
     });
+  });
+
+  this.socket.on('map', function(map) {
+    that.map.load(map);
   });
 
   this.socket.on('update', function(updateObject) {

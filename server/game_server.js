@@ -3,12 +3,63 @@ var _ = require('underscore')
   , CANNON = require('../vendor/cannon');
 
 function GameServer(io) {
+  this.map = {
+    entities: [
+      { type: 'house'
+      , position: { x: -5
+                  , y: 0
+                  , z: -5 }
+      , orientation: {
+          x: 0,
+          y: 0,
+          z: 0,
+          w: 0
+        }
+      },
+      { type: 'house'
+      , position: { x: 5
+                  , y: 0
+                  , z: -5 }
+      , orientation: {
+          x: 0,
+          y: 0,
+          z: 0,
+          w: 0
+        }
+      },
+      { type: 'house'
+      , position: { x: 5
+                  , y: 0
+                  , z: 5 }
+      , orientation: {
+          x: 0,
+          y: 0,
+          z: 0,
+          w: 0
+        }
+      },
+      { type: 'house'
+      , position: { x: -5
+                  , y: 0
+                  , z: 5 }
+      , orientation: {
+          x: 0,
+          y: 0,
+          z: 0,
+          w: 0
+        }
+      },
+    ]
+  };
+
   this.io = io;
 
   this.tanks = [];
   this.projectiles = [];
 
   this.physics = new Physics();
+
+  this.physics.createMap(this.map);
 
   var that = this;
   this.physics.on('projectile', function(projectile) {
@@ -22,6 +73,7 @@ function GameServer(io) {
   this.physics.on('activate', function(uuid) {
     that.io.sockets.emit('activate', uuid);
   });
+
 }
 
 GameServer.prototype.initSockets = function() {
@@ -71,6 +123,8 @@ GameServer.prototype.createTank = function(socket) {
   this.tanks.push(tank);
 
   socket.emit('init', { uuid: tank.uuid });
+
+  socket.emit('map', that.map);
 
   socket.on('keyUp', function(key) {
     tank.keys[key] = false;

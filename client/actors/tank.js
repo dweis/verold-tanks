@@ -80,13 +80,12 @@ Tank.prototype._initializeWithInstance = function(instance) {
   this.object.position = new THREE.Vector3(0,0,0);
   this.object.add(this.instance.threeData);
 
-  this.instance.threeData.position.y -= 0.1;
+  this.instance.threeData.position.y -= 0.12;
 
   /*
-  var geometry = new THREE.CubeGeometry( 0.45, 0.2, 0.7 );
+  var geometry = new THREE.CubeGeometry( 0.45, 0.24, 0.7 );
   var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
   var mesh = new THREE.Mesh( geometry, material );
-
   this.object.add(mesh);
   */
 

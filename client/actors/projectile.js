@@ -1,5 +1,4 @@
 function Projectile(uuid, tankUuid, template, scene) {
-  console.log('new projectile!');
   this.uuid = uuid;
   this.tankUuid = tankUuid;
   this.scene = scene;
@@ -22,11 +21,11 @@ Projectile.prototype.init = function(callback) {
     that.object.add(instance.threeData);
 
     /*
-    var geometry = new THREE.CubeGeometry( 0.05, 0.05, 0.15 );
+    var geometry = new THREE.CubeGeometry( 0.030, 0.030, 0.10 );
     var material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
     var mesh = new THREE.Mesh( geometry, material );
     that.object.add(mesh);
-   */
+    */
 
     that.scene.threeData.add(that.object);
 

@@ -1,12 +1,14 @@
 var events = require('events')
   , _ = require('underscore')
   , CANNON = require('../vendor/cannon')
-  , Tank = require('./actors/tank');
+  , Tank = require('./actors/tank')
+  , House = require('./actors/house');
 
 function Physics() {
   var that = this;
 
   this.objects = [];
+  this.mapEntities = [];
 
   this.world = new CANNON.World();
   this.world.gravity.set(0, -9.82, 0);
@@ -61,6 +63,17 @@ Physics.prototype.remove = function(object) {
   _.each(this.objects, function(obj,idx) {
     if (obj.uuid == object.uuid) {
       that.objects.splice(idx, 1);
+    }
+  });
+}
+
+Physics.prototype.createMap = function(map) {
+  var that = this;
+  _.each(map.entities, function(mapEntity) {
+    var entity;
+    if (mapEntity.type == 'house') {
+      entity = new House(that, mapEntity);
+      entity.init();
     }
   });
 }

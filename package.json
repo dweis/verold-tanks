@@ -1,6 +1,6 @@
 {
   "name": "verold-tanks",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "subdomain": "verold-tanks",
   "author": {
@@ -23,6 +23,7 @@
     "browserify": "2.4.1",
     "underscore": "1.4.4",
     "handleify": "0.1.1",
-    "tween": "0.8.0"
+    "tween": "0.8.0",
+    "bison": "git://github.com/BonsaiDen/BiSON.js.git"
   }
 }

@@ -1,6 +1,7 @@
 var Tank = require('./actors/tank')
   , Projectile = require('./actors/projectile')
   , TouchControls = require('./controls/touch_controls')
+  , BISON = require('bison')
   , Map = require('./map');
 
 GameClient = function( veroldApp ) {
@@ -20,7 +21,7 @@ GameClient = function( veroldApp ) {
 GameClient.prototype.startup = function( ) {
   var that = this;
 
-  //this.veroldApp.veroldEngine.Renderer.stats.domElement.hidden = false;
+  this.veroldApp.veroldEngine.Renderer.stats.domElement.hidden = false;
 
   this.veroldApp.loadScript('javascripts/OrbitControls.js', function() {
     that.veroldApp.loadScene( null, {
@@ -114,7 +115,9 @@ GameClient.prototype.initSockets = function() {
     that.map.load(map);
   });
 
-  this.socket.on('update', function(updateObject) {
+  this.socket.on('update', function(updateBSON) {
+    var updateObject = window.BISON.decode(updateBSON);
+
     while (updateObject.tanks.length >= 9) {
       var update = updateObject.tanks.splice(0,10)
         , found = false;

@@ -1,6 +1,7 @@
 var _ = require('underscore')
   , Physics = require('./physics')
-  , CANNON = require('../vendor/cannon');
+  , CANNON = require('../vendor/cannon')
+  , BISON = require('bison');
 
 function GameServer(io) {
   this.map = {
@@ -190,7 +191,7 @@ GameServer.prototype.getUpdateObject = function() {
 
 GameServer.prototype.update = function(delta) {
   if (this.tanks.length) {
-    this.io.sockets.emit('update', this.getUpdateObject());
+    this.io.sockets.emit('update', BISON.encode(this.getUpdateObject()));
   }
 }
 

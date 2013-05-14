@@ -1,13 +1,21 @@
-var browserify = require('browserify')
-  , handleify = require('handleify');
+var browserify = require('browserify'),
+		handleify = require('handleify');
 
 function browserify_middleware(opts) {
 	var bundle, cache_time;
 	var cache = '';
-	
-	if (typeof opts !== 'object') throw new Error('opts must be an object');
-	if ( ! opts.entry) throw new Error('must provide an entry point');
-	if ( ! opts.mount) throw new Error('must provide a mount point');
+
+	if (typeof opts !== 'object') {
+		throw new Error('opts must be an object');
+	}
+
+	if (!opts.entry) {
+		throw new Error('must provide an entry point');
+	}
+
+	if (!opts.mount) {
+		throw new Error('must provide a mount point');
+	}
 
 	bundle = browserify(opts.entry);
 

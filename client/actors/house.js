@@ -7,7 +7,7 @@ function House(scene, template, entityData) {
   this.object.position.set(0,0.5,0);
 
   this.object.position.set(entityData.position.x, 0.5, entityData.position.z);
-  this.object.quaternion.set(entityData.orientation.x, entityData.orientation.y, 
+  this.object.quaternion.set(entityData.orientation.x, entityData.orientation.y,
       entityData.orientation.z, entityData.orientation.w);
 
 }
@@ -15,7 +15,9 @@ function House(scene, template, entityData) {
 House.prototype.init = function(callback) {
   var that = this;
 
-  if (this.ready) return callback();
+  if (this.ready) {
+    return callback();
+  }
 
   this.template.clone({ success_hierarchy: function(instance) {
     that.scene.addChildObject(instance);
@@ -37,6 +39,6 @@ House.prototype.init = function(callback) {
 
     return callback();
   }});
-}
+};
 
 module.exports = House;

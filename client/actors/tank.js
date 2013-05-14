@@ -14,20 +14,21 @@ function Tank(uuid, template, scene, camera) {
 
   this.tmpVector3 = new THREE.Vector3();
   this.tmpQuaternion = new THREE.Quaternion();
-
 }
 
 Tank.prototype.init = function(callback) {
   var that = this;
 
-  if (this.ready) return callback();
+  if (this.ready) {
+    return callback();
+  }
 
   this.template.clone({ success_hierarchy: function(instance) {
     that.scene.addChildObject(instance);
     that._initializeWithInstance(instance);
     callback();
   }});
-}
+};
 
 Tank.prototype.setAsActive = function() {
   this.tank.visible = true;
@@ -40,7 +41,7 @@ Tank.prototype.setAsActive = function() {
     this.camera.position.set( 0, 0.5, -1.5 );
     this.camera.lookAt(new THREE.Vector3(0,0.5,0));
   }
-}
+};
 
 Tank.prototype.setAsDestroyed = function() {
   this.active = false;
@@ -53,17 +54,17 @@ Tank.prototype.setAsDestroyed = function() {
     this.camera.position.set( 0.5, 0.5, 1.5 );
     this.camera.lookAt(new THREE.Vector3(0,0,0));
   }
-}
+};
 
 Tank.prototype.isActive = function() {
   return this.active;
-}
+};
 
 Tank.prototype.update = function() {
-}
+};
 
 Tank.prototype.fixedUpdate = function() {
-}
+};
 
 Tank.prototype._initializeWithInstance = function(instance) {
   var that = this;
@@ -96,15 +97,15 @@ Tank.prototype._initializeWithInstance = function(instance) {
   this.instance.traverse(function(obj) {
     var name = obj.entityModel.get('name');
 
-    if (name.indexOf('TankDestroyed') == 0) {
+    if (name.indexOf('TankDestroyed') === 0) {
       that.tankDestroyed = obj.threeData;
-    } else if (name.indexOf('Tank') == 0) {
+    } else if (name.indexOf('Tank') === 0) {
       that.tank = obj.threeData;
-    } else if (name.indexOf('Turret') == 0) {
+    } else if (name.indexOf('Turret') === 0) {
       that.turret = obj.threeData;
       that.turret.originalQuaternion = new THREE.Quaternion();
       that.turret.originalQuaternion.copy(that.turret.quaternion);
-    } else if (name.indexOf('Gun') == 0) {
+    } else if (name.indexOf('Gun') === 0) {
       that.gun = obj.threeData;
       that.gun.originalQuaternion = new THREE.Quaternion();
       that.gun.originalQuaternion.copy(that.gun.quaternion);
@@ -116,7 +117,7 @@ Tank.prototype._initializeWithInstance = function(instance) {
   this.setAsActive();
 
   this.ready = true;
-}
+};
 
 Tank.prototype.applyUpdate = function(update) {
   this.object.position.set(update[1], update[2], update[3]);
@@ -129,6 +130,6 @@ Tank.prototype.applyUpdate = function(update) {
   this.tmpQuaternion.setFromAxisAngle(new THREE.Vector3(0,1,0), update[9]);
   this.gun.quaternion.copy(this.gun.originalQuaternion);
   this.gun.quaternion.multiply(this.tmpQuaternion);
-}
+};
 
 module.exports = Tank;

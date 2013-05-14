@@ -7,21 +7,22 @@
   <link rel="stylesheet" href="stylesheets/style.css">
 </head>
 <body>
-
   <div id="loading-progress-container">
     <p>Loading...</p>
     <div class="loading-progress">
       <div>&nbsp;</div>
     </div>
   </div>
-
+  <div id="render-target-container"></div>
   <div style="display:none;" id="webGLunsupported">
     <p>This demo requires support for webGL.<br />
     Click <a href="http://verold.com/blog/2013/1/2/enabling-webgl-in-your-browser" target="_blank">here</a> to learn more.</p>
   </div>
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
   <script src="javascripts/gamecontroller.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.js"></script>
+  <script type="text/javascript" src="http://assets.verold.com/verold_api/verold_api_v1.0.4.js"></script>
+  <script type="text/javascript" src="http://assets.verold.com/verold_api/lib/OrbitControls.js"></script>
   <script type="text/javascript" src="javascripts/tanks.js"></script>
 </body>
 </html>

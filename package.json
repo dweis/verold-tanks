@@ -25,5 +25,14 @@
     "handleify": "0.1.1",
     "tween": "0.8.0",
     "bison": "git://github.com/BonsaiDen/BiSON.js.git"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-livereload": "~0.1.2",
+    "grunt-regarde": "~0.1.1",
+    "grunt-contrib-jshint": "~0.4.3",
+    "grunt-cli": "~0.1.7",
+    "grunt-express-server": "~0.1.0",
+    "grunt-rsync": "~0.1.1"
   }
 }

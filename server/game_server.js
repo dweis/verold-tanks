@@ -1,55 +1,26 @@
-var _ = require('underscore')
-  , Physics = require('./physics')
-  , CANNON = require('../vendor/cannon')
-  , BISON = require('bison');
+var _ = require('underscore'),
+    Physics = require('./physics'),
+    BISON = require('bison');
 
 function GameServer(io) {
   this.map = {
     entities: [
-      { type: 'house'
-      , position: { x: -5
-                  , y: 0
-                  , z: -5 }
-      , orientation: {
-          x: 0,
-          y: 0,
-          z: 0,
-          w: 0
-        }
+      { type: 'house',
+        position: { x: -5, y: 0, z: -5 },
+        orientation: { x: 0, y: 0, z: 0, w: 0 }
       },
-      { type: 'house'
-      , position: { x: 5
-                  , y: 0
-                  , z: -5 }
-      , orientation: {
-          x: 0,
-          y: 0,
-          z: 0,
-          w: 0
-        }
+      { type: 'house',
+        position: { x: 5, y: 0, z: -5 } ,
+        orientation: { x: 0, y: 0, z: 0, w: 0 }
       },
-      { type: 'house'
-      , position: { x: 5
-                  , y: 0
-                  , z: 5 }
-      , orientation: {
-          x: 0,
-          y: 0,
-          z: 0,
-          w: 0
-        }
+      { type: 'house',
+        position: { x: 5, y: 0, z: 5 },
+        orientation: { x: 0, y: 0, z: 0, w: 0 }
       },
-      { type: 'house'
-      , position: { x: -5
-                  , y: 0
-                  , z: 5 }
-      , orientation: {
-          x: 0,
-          y: 0,
-          z: 0,
-          w: 0
-        }
-      },
+      { type: 'house',
+        position: { x: -5, y: 0, z: 5 },
+        orientation: { x: 0, y: 0, z: 0, w: 0 }
+      }
     ]
   };
 
@@ -97,8 +68,12 @@ GameServer.prototype.initSockets = function() {
   }, 1000/60);
 
   setInterval(function() {
-    if (that.tanks.length) that.updateActiveTanks();
-    if (that.tanks.length) that.updateActiveProjectiles();
+    if (that.tanks.length) {
+      that.updateActiveTanks();
+    }
+    if (that.tanks.length) {
+      that.updateActiveProjectiles();
+    }
   }, 1000);
 
   setInterval(function() {
@@ -108,15 +83,15 @@ GameServer.prototype.initSockets = function() {
   setInterval(function() {
     that.pruneOldProjectiles();
   }, 2000);
-}
+};
 
 GameServer.prototype.init = function() {
   this.initSockets();
-}
+};
 
 GameServer.prototype.createTank = function(socket) {
-  var that = this
-    , tank = this.physics.addTank();
+  var that = this,
+      tank = this.physics.addTank();
 
   tank.socket = socket;
 
@@ -145,18 +120,18 @@ GameServer.prototype.createTank = function(socket) {
   });
 
   return tank;
-}
+};
 
 GameServer.prototype.removeTank = function(tankToRemove) {
   var that = this;
 
   _.each(this.tanks, function(tank, idx) {
-    if (tank.uuid == tankToRemove.uuid) {
+    if (tank.uuid === tankToRemove.uuid) {
       that.physics.remove(tank);
       console.log('%s - Removing tank with uuid: %s', new Date(), that.tanks.splice(idx, 1)[0].uuid);
     }
   });
-}
+};
 
 GameServer.prototype.getUpdateObject = function() {
   var updateObj = { tanks: [], projectiles: [] };
@@ -187,35 +162,35 @@ GameServer.prototype.getUpdateObject = function() {
   });
 
   return updateObj;
-}
+};
 
-GameServer.prototype.update = function(delta) {
+GameServer.prototype.update = function() {
   if (this.tanks.length) {
     this.io.sockets.emit('update', BISON.encode(this.getUpdateObject()));
   }
-}
+};
 
 GameServer.prototype.fixedUpdate = function(delta) {
   if (this.physics && this.tanks.length) {
     this.physics.update(this.tanks, delta);
   }
-}
+};
 
 GameServer.prototype.updateActiveTanks = function() {
   this.io.sockets.emit('activeTanks', _.pluck(this.tanks, 'uuid'));
-}
+};
 
 GameServer.prototype.updateActiveProjectiles = function() {
   this.io.sockets.emit('activeProjectiles', _.pluck(this.projectiles, 'uuid'));
-}
+};
 
 GameServer.prototype.showStats = function() {
   console.log('%s - Tanks connected: %s Projectiles: %s', new Date(), this.tanks.length, this.projectiles.length);
-}
+};
 
 GameServer.prototype.pruneOldProjectiles = function() {
-  var that = this
-    , time = Date.now();
+  var that = this,
+      time = Date.now();
 
   _.each(this.projectiles, function(projectile, idx) {
     if (projectile.timeShot < time - 2000) {
@@ -223,6 +198,6 @@ GameServer.prototype.pruneOldProjectiles = function() {
       that.projectiles.splice(idx, 1);
     }
   });
-}
+};
 
 module.exports = GameServer;

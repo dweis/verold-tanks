@@ -225,6 +225,31 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	}
 
+  function onTouchStart( event ) {
+    alert('start');
+    if ( !scope.userRotate ) return;
+
+    event.preventDefault();
+
+    var touches = event.changedTouches, first = touches[0];
+
+    state = STATE.ROTATE;
+
+    rotateStart.set( first.clientX, first.clientY );
+
+    document.addEventListener( 'touchmove', onTouchMove, false );
+    document.addEventListener( 'touchend', onTouchEnd, false );
+  }
+
+  function onTouchEnd( event) {
+		if ( ! scope.userRotate ) return;
+
+		document.removeEventListener( 'touchmove', onTouchMove, false );
+		document.removeEventListener( 'touchup', onTouchEnd, false );
+
+		state = STATE.NONE;
+  }
+
 	function onMouseMove( event ) {
 
 		event.preventDefault();
@@ -299,9 +324,20 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	}
 
+  function onTouchMove( event ) {
+    alert('MOVE!');
+    event.preventDefault();
+
+    var touches = event.changedTouches, first = touches[0];
+
+    onMouseMove({ clientX: first.clientX, clientY: first.clientY });
+  }
+
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 	this.domElement.addEventListener( 'mousedown', onMouseDown, false );
 	this.domElement.addEventListener( 'mousewheel', onMouseWheel, false );
 	this.domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
-
+  this.domElement.addEventListener( 'touchstart', onTouchStart, true );
+  //this.domElement.addEventListener( 'touchend', onTouchEnd, false );
+  //this.domElement.addEventListener( 'touchmove', onTouchMove, false );
 };

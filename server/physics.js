@@ -1,12 +1,10 @@
-var events = require('events')
-  , _ = require('underscore')
-  , CANNON = require('../vendor/cannon')
-  , Tank = require('./actors/tank')
-  , House = require('./actors/house');
+var events = require('events'),
+    _ = require('underscore'),
+    CANNON = require('../vendor/cannon'),
+    Tank = require('./actors/tank'),
+    House = require('./actors/house');
 
 function Physics() {
-  var that = this;
-
   this.objects = [];
   this.mapEntities = [];
 
@@ -33,13 +31,11 @@ function Physics() {
   this.groundBody = groundBody;
 }
 
-Physics.prototype = new events.EventEmitter;
+Physics.prototype = new events.EventEmitter();
 
 Physics.prototype.update = function(tanks, delta) {
-  var that = this;
-
   this.world.step(delta);
-}
+};
 
 Physics.prototype.addTank = function() {
   var tank = new Tank(this);
@@ -47,35 +43,33 @@ Physics.prototype.addTank = function() {
   tank.init();
 
   return tank;
-}
+};
 
 Physics.prototype.add = function(object) {
   this.objects.push(object);
 
   this.world.add(object.body);
-}
+};
 
 Physics.prototype.remove = function(object) {
-  var that = this;
-
   this.world.remove(object.body);
 
   _.each(this.objects, function(obj,idx) {
-    if (obj.uuid == object.uuid) {
-      that.objects.splice(idx, 1);
+    if (obj.uuid === object.uuid) {
+      this.objects.splice(idx, 1);
     }
-  });
-}
+  }, this);
+};
 
 Physics.prototype.createMap = function(map) {
   var that = this;
   _.each(map.entities, function(mapEntity) {
     var entity;
-    if (mapEntity.type == 'house') {
+    if (mapEntity.type === 'house') {
       entity = new House(that, mapEntity);
       entity.init();
     }
   });
-}
+};
 
 module.exports = Physics;

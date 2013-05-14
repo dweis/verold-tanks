@@ -1,266 +1,248 @@
-var Tank = require('./actors/tank')
-  , Projectile = require('./actors/projectile')
-  , TouchControls = require('./controls/touch_controls')
-  , BISON = require('bison')
-  , Map = require('./map');
+require('bison');
 
-GameClient = function( veroldApp ) {
+var _ = require('underscore'),
+    Tank = require('./actors/tank'),
+    Projectile = require('./actors/projectile'),
+    TouchControls = require('./controls/touch_controls'),
+    GameMap = require('./game_map'),
+    BISON = window.BISON;
 
-  this.veroldApp = veroldApp;
-  this.mainScene;
-  this.camera;
-  this.cameraControls;
-  this.tank;
-  this.tankModel;
-  this.bulletModel;
-  this.socket;
-  this.tanks = [];
-  this.projectiles = [];
-}
+var GameClient = window.VAPI.VeroldApp.extend({
+  initialize: function() {
+    this.tanks = [];
+    this.projectiles = [];
+  },
 
-GameClient.prototype.startup = function( ) {
-  var that = this;
+  defaultSceneLoaded: function(scene) {
+    this.initSockets();
 
-  this.veroldApp.veroldEngine.Renderer.stats.domElement.hidden = false;
+    //Bind to input events to control the camera
+    this.veroldEngine.on('keyDown', this.onKeyDown, this);
+    this.veroldEngine.on('keyUp', this.onKeyUp, this);
+    this.veroldEngine.on('mouseUp', this.onMouseUp, this);
+    this.veroldEngine.on('fixedUpdate', this.fixedUpdate, this );
+    this.veroldEngine.on('update', this.update, this );
 
-  this.veroldApp.loadScript('javascripts/OrbitControls.js', function() {
-    that.veroldApp.loadScene( null, {
-      success_hierarchy: function( scene ) {
-
-        that.initSockets();
-
-        // hide progress indicator
-        that.veroldApp.hideLoadingProgress();
-
-        that.inputHandler = that.veroldApp.getInputHandler();
-        that.renderer = that.veroldApp.getRenderer();
-        that.picker = that.veroldApp.getPicker();
-
-        //Bind to input events to control the camera
-        that.veroldApp.on('keyDown', that.onKeyDown, that);
-        that.veroldApp.on('keyUp', that.onKeyUp, that);
-        that.veroldApp.on('mouseUp', that.onMouseUp, that);
-        that.veroldApp.on('fixedUpdate', that.fixedUpdate, that );
-        that.veroldApp.on('update', that.update, that );
-
-        if (that.veroldApp.isMobile()) {
-          that.touchControls = new TouchControls();
-          that.touchControls.init();
-          that.touchControls.callback = function(type, key) {
-            if (type == 'down')
-              that.socket.emit('keyDown', key);
-            if (type == 'up')
-              that.socket.emit('keyUp', key);
-            if (type == 'fire')
-              that.socket.emit('fire');
-          }
+    if (window.VAPI.isMobile()) {
+      this.touchControls = new TouchControls();
+      this.touchControls.init();
+      this.touchControls.callback = $.proxy(function(type, key) {
+        if (type === 'down') {
+          this.socket.emit('keyDown', key);
+        } else  if (type === 'up') {
+          this.socket.emit('keyUp', key);
+        } else if (type === 'fire') {
+          this.socket.emit('fire');
         }
+      }, this);
+    }
 
-        //Store a pointer to the scene
-        that.mainScene = scene;
+    //Store a pointer to the scene
+    this.mainScene = scene;
 
-        var models = that.mainScene.getAllObjects( { "filter" :{ "model" : true }});
-        that.tankModel = that.mainScene.getObject('51446660ca7df102000009c0');
-        that.bulletModel = that.mainScene.getObject('514b346d97481f020000020e');
+    this.tankModel = this.mainScene.getObject('51446660ca7df102000009c0');
+    this.bulletModel = this.mainScene.getObject('514b346d97481f020000020e');
 
-        that.mainScene.removeChildObject(that.tankModel);
-        that.mainScene.removeChildObject(that.bulletModel);
+    this.mainScene.removeChildObject(this.tankModel);
+    this.mainScene.removeChildObject(this.bulletModel);
 
-        that.map = new Map(scene);
-        that.map.init();
+    this.map = new GameMap(scene);
+    this.map.init();
 
-        //Create the camera
-        that.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10000 );
-        that.camera.up.set( 0, 1, 0 );
+    //Create the camera
+    this.camera = new THREE.PerspectiveCamera( 70, this.getWidth() / this.getHeight(), 0.1, 10000 );
+    this.camera.up.set( 0, 1, 0 );
 
-        that.cameraControls = new THREE.OrbitControls(that.camera, that.veroldApp.getRenderer().domElement);
+    this.cameraControls = new THREE.OrbitControls(this.camera, $(this.el)[0]);
 
-        //Tell the engine to use this camera when rendering the scene.
-        that.veroldApp.setActiveCamera( that.camera );
+    //Tell the engine to use this camera when rendering the scene.
+    this.setActiveCamera( this.camera );
+  },
 
-      },
+  defaultSceneProgress: function(scene) {
+    var percent = Math.floor((scene.loadingProgress.loaded_hierarchy / scene.loadingProgress.total_hierarchy)*100);
+    $('#loading-progress-container .loading-progress div').css({ width: percent + '%' });
+  },
 
-      progress: function(sceneObj) {
-        var percent = Math.floor((sceneObj.loadingProgress.loaded_hierarchy / sceneObj.loadingProgress.total_hierarchy)*100);
-        that.veroldApp.setLoadingProgress(percent);
-      }
-    });
+  initSockets: function() {
+    var that = this;
 
-  });
-}
+    this.socket = window.io.connect();
 
-GameClient.prototype.initSockets = function() {
-  var that = this;
-
-  this.socket = io.connect();
-
-  this.socket.on('kill', function(details) {
-    _.each(that.tanks, function(tank) {
-      if (tank.uuid == details.who && tank.active) {
-        //alert(details.who + ' was killed by ' + details.by);
-        tank.setAsDestroyed()
-      }
-    });
-  });
-
-  this.socket.on('activate', function(uuid) {
-    _.each(that.tanks, function(tank) {
-      if (tank.uuid == uuid && !tank.active) {
-        tank.setAsActive()
-      }
-    });
-  });
-
-  this.socket.on('map', function(map) {
-    that.map.load(map);
-  });
-
-  this.socket.on('update', function(updateBSON) {
-    var updateObject = window.BISON.decode(updateBSON);
-
-    while (updateObject.tanks.length >= 9) {
-      var update = updateObject.tanks.splice(0,10)
-        , found = false;
-
+    this.socket.on('kill', function(details) {
       _.each(that.tanks, function(tank) {
-        if (tank.uuid == update[0]) {
-          found = true;
-          tank.applyUpdate(update);
+        if (tank.uuid === details.who && tank.active) {
+          tank.setAsDestroyed();
         }
       });
+    });
 
-      if (!found) {
-        var tank = new Tank(update[0], that.tankModel, that.mainScene);
-
-        tank.init(function() {
-          tank.applyUpdate(update);
-          that.tanks.push(tank);
-        });
-      }
-    }
-
-    while (updateObject.projectiles.length >= 8) {
-      var update = updateObject.projectiles.splice(0,9)
-        , found = false;
-
-
-      _.each(that.projectiles, function(projectile) {
-        if (projectile.uuid == update[0]) {
-          found = true;
-          projectile.applyUpdate(update);
+    this.socket.on('activate', function(uuid) {
+      _.each(that.tanks, function(tank) {
+        if (tank.uuid === uuid && !tank.active) {
+          tank.setAsActive();
         }
       });
+    });
 
-      if (!found) {
-        var projectile = new Projectile(update[0], update[1], that.bulletModel, that.mainScene);
+    this.socket.on('map', function(map) {
+      that.map.load(map);
+    });
 
-        projectile.init(function() {
-          projectile.applyUpdate(update);
-          that.projectiles.push(projectile);
+    this.socket.on('update', function(updateBSON) {
+      var updateObject = BISON.decode(updateBSON);
+
+      var processTank = function(tanks) {
+        var update = tanks.splice(0,10), found = false;
+
+        _.each(that.tanks, function(tank) {
+          if (tank.uuid === update[0]) {
+            found = true;
+            tank.applyUpdate(update);
+          }
         });
+
+        if (!found) {
+          var tank = new Tank(update[0], that.tankModel, that.mainScene);
+
+          tank.init(function() {
+            tank.applyUpdate(update);
+            that.tanks.push(tank);
+          });
+        }
+      };
+
+      while (updateObject.tanks.length >= 9) {
+        processTank(updateObject.tanks);
       }
+
+      var processProjectile = function(projectiles) {
+        var update = projectiles.splice(0,9),
+            found = false;
+
+        _.each(that.projectiles, function(projectile) {
+          if (projectile.uuid === update[0]) {
+            found = true;
+            projectile.applyUpdate(update);
+          }
+        });
+
+        if (!found) {
+          var projectile = new Projectile(update[0], update[1], that.bulletModel, that.mainScene);
+
+          projectile.init(function() {
+            projectile.applyUpdate(update);
+            that.projectiles.push(projectile);
+          });
+        }
+      };
+
+      while (updateObject.projectiles.length >= 8) {
+        processProjectile(updateObject.projectiles);
+      }
+    });
+
+    this.socket.on('connect', function() {
+    });
+
+    this.socket.on('activeTanks', function(activeTanks) {
+      _.each(that.tanks, function(tank, idx) {
+        if (!_.contains(activeTanks, tank.uuid)) {
+          that.mainScene.threeData.remove(tank.object);
+          that.tanks.splice(idx, 1);
+        }
+      });
+    });
+
+    this.socket.on('activeProjectiles', function(activeProjectiles) {
+      _.each(that.projectiles, function(projectile, idx) {
+        if (!_.contains(activeProjectiles, projectile.uuid)) {
+          that.mainScene.threeData.remove(projectile.object);
+          that.projectiles.splice(idx, 1);
+        }
+      });
+    });
+
+    this.socket.on('init', function(info) {
+      var tank = new Tank(info.uuid, that.tankModel, that.mainScene, that.camera);
+
+      tank.init(function() {
+        tank.setAsActive();
+
+        that.tank = tank;
+        that.tanks.push(tank);
+      });
+
+    });
+  },
+
+  remove: function() {
+    this.veroldApp.off('keyDown', this.onKeyDown, this);
+    this.veroldApp.off('keyUp', this.onKeyUp, this);
+    this.veroldApp.off('mouseUp', this.onMouseUp, this);
+    this.veroldApp.off('update', this.update, this );
+    window.VAPI.VeroldApp.remove.apply(this);
+  },
+
+  update: function() {
+    if (this.tank) {
+      this.tank.update();
     }
-  });
 
-  this.socket.on('connect', function() {
-  });
+    if (this.cameraControls) {
+      this.cameraControls.update();
+    }
+  },
 
-  this.socket.on('activeTanks', function(activeTanks) {
-    _.each(that.tanks, function(tank, idx) {
-      if (!_.contains(activeTanks, tank.uuid)) {
-        that.mainScene.threeData.remove(tank.object);
-        that.tanks.splice(idx, 1);
-      }
-    });
-  });
+  fixedUpdate: function() {
+    if (this.tank) {
+      this.tank.fixedUpdate();
+    }
+  },
 
-  this.socket.on('activeProjectiles', function(activeProjectiles) {
-    _.each(that.projectiles, function(projectile, idx) {
-      if (!_.contains(activeProjectiles, projectile.uuid)) {
-        that.mainScene.threeData.remove(projectile.object);
-        that.projectiles.splice(idx, 1);
-      }
-    });
-  });
+  onKeyDown: function( event ) {
+    var keyCodes = this.getInputHandler().keyCodes;
+    if (event.keyCode === keyCodes.W) {
+      this.socket.emit('keyDown', 'W');
+    } else if (event.keyCode === keyCodes.A) {
+      this.socket.emit('keyDown', 'A');
+    } else if (event.keyCode === keyCodes.S) {
+      this.socket.emit('keyDown', 'S');
+    } else if (event.keyCode === keyCodes.D) {
+      this.socket.emit('keyDown', 'D');
+    } else if (event.keyCode === keyCodes.leftArrow) {
+      this.socket.emit('keyDown', 'leftArrow');
+    } else if (event.keyCode === keyCodes.rightArrow) {
+      this.socket.emit('keyDown', 'rightArrow');
+    } else if (event.keyCode === keyCodes.upArrow) {
+      this.socket.emit('keyDown', 'upArrow');
+    } else if (event.keyCode === keyCodes.downArrow) {
+      this.socket.emit('keyDown', 'downArrow');
+    }
+  },
 
-  this.socket.on('init', function(info) {
-    var tank = new Tank(info.uuid, that.tankModel, that.mainScene, that.camera);
-
-    tank.init(function() {
-      tank.setAsActive();
-
-      that.tank = tank;
-      that.tanks.push(tank);
-    });
-
-  });
-}
-
-GameClient.prototype.shutdown = function() {
-  this.veroldApp.off('keyDown', this.onKeyDown, this);
-  this.veroldApp.off('keyUp', this.onKeyUp, this);
-  this.veroldApp.off('mouseUp', this.onMouseUp, this);
-  this.veroldApp.off('update', this.update, this );
-}
-
-GameClient.prototype.update = function( delta ) {
-  if (this.tank) {
-    this.tank.update();
+  onKeyUp: function( event ) {
+    var keyCodes = this.getInputHandler().keyCodes;
+    if (event.keyCode === keyCodes.W) {
+      this.socket.emit('keyUp', 'W');
+    } else if (event.keyCode === keyCodes.A) {
+      this.socket.emit('keyUp', 'A');
+    } else if (event.keyCode === keyCodes.S) {
+      this.socket.emit('keyUp', 'S');
+    } else if (event.keyCode === keyCodes.D) {
+      this.socket.emit('keyUp', 'D');
+    } else if (event.keyCode === keyCodes.leftArrow) {
+      this.socket.emit('keyUp', 'leftArrow');
+    } else if (event.keyCode === keyCodes.rightArrow) {
+      this.socket.emit('keyUp', 'rightArrow');
+    } else if (event.keyCode === keyCodes.upArrow) {
+      this.socket.emit('keyUp', 'upArrow');
+    } else if (event.keyCode === keyCodes.downArrow) {
+      this.socket.emit('keyUp', 'downArrow');
+    } else if (event.keyCode === keyCodes.space) {
+      this.socket.emit('fire');
+    }
   }
-
-  if (this.cameraControls) {
-    this.cameraControls.update();
-  }
-}
-
-GameClient.prototype.fixedUpdate = function( delta ) {
-  if (this.tank) {
-    this.tank.fixedUpdate();
-  }
-}
-
-GameClient.prototype.onKeyDown = function( event ) {
-	var keyCodes = this.inputHandler.keyCodes;
-  if (event.keyCode === keyCodes['W']) {
-    this.socket.emit('keyDown', 'W');
-  } else if (event.keyCode === keyCodes['A']) {
-    this.socket.emit('keyDown', 'A');
-  } else if (event.keyCode === keyCodes['S']) {
-    this.socket.emit('keyDown', 'S');
-  } else if (event.keyCode === keyCodes['D']) {
-    this.socket.emit('keyDown', 'D');
-  } else if (event.keyCode === keyCodes['leftArrow']) {
-    this.socket.emit('keyDown', 'leftArrow');
-  } else if (event.keyCode === keyCodes['rightArrow']) {
-    this.socket.emit('keyDown', 'rightArrow');
-  } else if (event.keyCode === keyCodes['upArrow']) {
-    this.socket.emit('keyDown', 'upArrow');
-  } else if (event.keyCode === keyCodes['downArrow']) {
-    this.socket.emit('keyDown', 'downArrow');
-  }
-}
-
-GameClient.prototype.onKeyUp = function( event ) {
-	var keyCodes = this.inputHandler.keyCodes;
-  if (event.keyCode === keyCodes['W']) {
-    this.socket.emit('keyUp', 'W');
-  } else if (event.keyCode === keyCodes['A']) {
-    this.socket.emit('keyUp', 'A');
-  } else if (event.keyCode === keyCodes['S']) {
-    this.socket.emit('keyUp', 'S');
-  } else if (event.keyCode === keyCodes['D']) {
-    this.socket.emit('keyUp', 'D');
-  } else if (event.keyCode === keyCodes['leftArrow']) {
-    this.socket.emit('keyUp', 'leftArrow');
-  } else if (event.keyCode === keyCodes['rightArrow']) {
-    this.socket.emit('keyUp', 'rightArrow');
-  } else if (event.keyCode === keyCodes['upArrow']) {
-    this.socket.emit('keyUp', 'upArrow');
-  } else if (event.keyCode === keyCodes['downArrow']) {
-    this.socket.emit('keyUp', 'downArrow');
-  } else if (event.keyCode === keyCodes['space']) {
-    this.socket.emit('fire');
-  }
-}
+});
 
 module.exports = GameClient;

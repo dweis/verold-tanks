@@ -1,3 +1,5 @@
+/* global GameController */
+
 function TouchControls(callback) {
   this.callback = callback;
 }
@@ -17,38 +19,38 @@ TouchControls.prototype.init = function() {
       position: { left: '10%' },
       dpad: {
         up: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'W');
             that.callback('down', 'W');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'W');
           }
         },
         down: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'S');
             that.callback('down', 'S');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'S');
           }
         },
         left: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'A');
             that.callback('down', 'A');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'A');
           }
         },
         right: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'D');
             that.callback('down', 'D');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'D');
           }
         }
@@ -59,44 +61,44 @@ TouchControls.prototype.init = function() {
       position: { right: '20%' },
       dpad: {
         up: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'upArrow');
             that.callback('down', 'upArrow');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'upArrow');
           }
         },
         down: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'downArrow');
             that.callback('down', 'downArrow');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'downArrow');
           }
         },
         left: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'leftArrow');
             that.callback('down', 'leftArrow');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'leftArrow');
           }
         },
         right: {
-          touchStart: function(details) {
+          touchStart: function() {
             that.callback('press', 'rightArrow');
             that.callback('down', 'rightArrow');
           },
-          touchEnd: function(details) {
+          touchEnd: function() {
             that.callback('up', 'rightArrow');
           }
         }
       }
     }
   });
-}
+};
 
 module.exports = TouchControls;
